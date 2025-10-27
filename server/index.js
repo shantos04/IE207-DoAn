@@ -32,6 +32,11 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/products', require('./routes/products'))
+app.use('/api/suppliers', require('./routes/suppliers'))
+app.use('/api/customers', require('./routes/customers'))
+app.use('/api/orders', require('./routes/orders'))
+app.use('/api/inventory', require('./routes/inventory'))
+app.use('/api/reports', require('./routes/reports'))
 
 app.use((err, req, res, next) => {
     console.error(err)
