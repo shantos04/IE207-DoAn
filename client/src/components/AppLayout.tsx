@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 
-const menu = [
+const staffMenu = [
     { to: '/', label: 'Tổng quan' },
     { to: '/products', label: 'Sản phẩm' },
     { to: '/orders', label: 'Đơn hàng' },
@@ -10,9 +11,31 @@ const menu = [
     { to: '/settings', label: 'Thiết lập' },
 ]
 
+const customerMenu = [
+    { to: '/shop', label: '🛒 Cửa hàng' },
+    { to: '/my-orders', label: '📦 Đơn hàng của tôi' },
+]
+
 export default function AppLayout() {
     const { pathname } = useLocation()
     const navigate = useNavigate()
+    const [userRole, setUserRole] = useState<string>('customer')
+
+    useEffect(() => {
+        // Decode JWT token to get user info
+        const token = localStorage.getItem('token')
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]))
+                setUserRole(payload.role || 'customer')
+                // In production, you should fetch user name from API
+            } catch (e) {
+                console.error('Failed to decode token', e)
+            }
+        }
+    }, [])
+
+    const menu = userRole === 'customer' ? customerMenu : staffMenu
 
     const logout = () => {
         localStorage.removeItem('token')
@@ -66,6 +89,7 @@ export default function AppLayout() {
 }
 
 function getTitle(path: string) {
-    const found = menu.find(m => (m.to === '/' ? path === '/' : path.startsWith(m.to)))
+    const allMenus = [...staffMenu, ...customerMenu]
+    const found = allMenus.find(m => (m.to === '/' ? path === '/' : path.startsWith(m.to)))
     return found?.label ?? 'Trang'
 }

@@ -1,13 +1,29 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getDashboardStats } from '../services/reports'
 
 export default function Dashboard() {
     const [stats, setStats] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const navigate = useNavigate()
 
     useEffect(() => {
+        // Check if user is customer, redirect to shop
+        const token = localStorage.getItem('token')
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]))
+                if (payload.role === 'customer') {
+                    navigate('/shop', { replace: true })
+                    return
+                }
+            } catch (e) {
+                console.error('Failed to decode token', e)
+            }
+        }
+
         getDashboardStats().then(setStats).catch(console.error).finally(() => setLoading(false))
-    }, [])
+    }, [navigate])
 
     if (loading) return <div className="p-4">Đang tải...</div>
 

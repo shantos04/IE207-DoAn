@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/User')
+const Customer = require('../models/Customer')
 
 function signToken(user) {
     return jwt.sign({ sub: user._id, role: user.role }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' })
@@ -7,7 +8,22 @@ function signToken(user) {
 
 exports.register = async (req, res, next) => {
     try {
-        const user = await User.create(req.body)
+        const { name, email, password, role, phone, address } = req.body
+
+        // Tạo user
+        const user = await User.create({ name, email, password, role: role || 'customer', phone, address })
+
+        // Nếu là customer, tự động tạo bản ghi Customer
+        if (user.role === 'customer') {
+            await Customer.create({
+                name: user.name,
+                email: user.email,
+                phone: user.phone || '',
+                address: user.address || '',
+                note: 'Tự đăng ký qua hệ thống'
+            })
+        }
+
         const token = signToken(user)
         res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } })
     } catch (e) { next(e) }

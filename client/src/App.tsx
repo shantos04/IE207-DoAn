@@ -12,6 +12,8 @@ import Suppliers from './pages/Suppliers'
 import Customers from './pages/Customers'
 import Inventory from './pages/Inventory'
 import Settings from './pages/Settings'
+import Shop from './pages/Shop'
+import MyOrders from './pages/MyOrders'
 import AppLayout from './components/AppLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -41,6 +43,8 @@ function App() {
         <Route path="customers" element={<Customers />} />
         <Route path="inventory" element={<Inventory />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="shop" element={<Shop />} />
+        <Route path="my-orders" element={<MyOrders />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

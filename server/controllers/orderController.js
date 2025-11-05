@@ -6,6 +6,20 @@ exports.list = async (req, res, next) => {
     try {
         const { status, page = 1, limit = 20 } = req.query
         const filter = status ? { status } : {}
+
+        // Nếu user là customer, chỉ xem đơn hàng của mình
+        if (req.user.role === 'customer') {
+            const Customer = require('../models/Customer')
+            const User = require('../models/User')
+            const user = await User.findById(req.user.sub)
+            const customer = await Customer.findOne({ email: user.email })
+            if (customer) {
+                filter.customer = customer._id
+            } else {
+                return res.json({ items: [], total: 0 })
+            }
+        }
+
         const items = await Order.find(filter)
             .populate('customer', 'name email phone')
             .populate('items.product', 'name sku')
@@ -29,7 +43,23 @@ exports.get = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
     try {
-        const { customer, items, note } = req.body
+        let { customer, items, note } = req.body
+
+        // Nếu user là customer, tự động gán customer từ email
+        if (req.user.role === 'customer') {
+            const Customer = require('../models/Customer')
+            const User = require('../models/User')
+            const user = await User.findById(req.user.sub)
+            const customerDoc = await Customer.findOne({ email: user.email })
+            if (!customerDoc) {
+                return res.status(400).json({ message: 'Customer profile not found' })
+            }
+            customer = customerDoc._id
+        }
+
+        if (!customer) {
+            return res.status(400).json({ message: 'Customer is required' })
+        }
 
         // Calculate total
         let total = 0

@@ -16,6 +16,20 @@ async function run() {
         console.log('Created admin user:', adminEmail)
     }
 
+    // Seed customer users
+    const customerUsers = [
+        { name: 'Nguyễn Văn A', email: 'customer1@example.com', password: 'customer123', role: 'customer', phone: '0901234567', address: 'Quận 1, TP.HCM' },
+        { name: 'Trần Thị B', email: 'customer2@example.com', password: 'customer123', role: 'customer', phone: '0907654321', address: 'Quận 3, TP.HCM' },
+    ]
+    for (const u of customerUsers) {
+        const existing = await User.findOne({ email: u.email })
+        if (!existing) {
+            await User.create(u)
+            await Customer.create({ name: u.name, email: u.email, phone: u.phone, address: u.address, note: 'Tài khoản mẫu' })
+            console.log('Created customer user:', u.email)
+        }
+    }
+
     // Seed suppliers
     const suppliers = [
         { name: 'Công ty Yageo Việt Nam', email: 'sales@yageo.vn', phone: '0281234567', address: 'KCN Tân Bình, TP.HCM' },
