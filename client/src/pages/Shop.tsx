@@ -30,8 +30,19 @@ export default function Shop() {
     useEffect(() => { fetchProducts() }, [])
 
     const addToCart = (product: Product) => {
+        // Kiểm tra tồn kho
+        if (product.stock <= 0) {
+            alert('Sản phẩm đã hết hàng!')
+            return
+        }
+
         const existing = cart.find(item => item._id === product._id)
         if (existing) {
+            // Kiểm tra không vượt quá tồn kho
+            if (existing.quantity >= product.stock) {
+                alert(`Chỉ còn ${product.stock} sản phẩm trong kho!`)
+                return
+            }
             setCart(cart.map(item =>
                 item._id === product._id
                     ? { ...item, quantity: item.quantity + 1 }
@@ -46,6 +57,11 @@ export default function Shop() {
         if (quantity <= 0) {
             setCart(cart.filter(item => item._id !== productId))
         } else {
+            const item = cart.find(i => i._id === productId)
+            if (item && quantity > item.stock) {
+                alert(`Chỉ còn ${item.stock} sản phẩm trong kho!`)
+                return
+            }
             setCart(cart.map(item =>
                 item._id === productId ? { ...item, quantity } : item
             ))
@@ -63,6 +79,20 @@ export default function Shop() {
     const handleCheckout = async () => {
         if (cart.length === 0) {
             alert('Giỏ hàng trống')
+            return
+        }
+
+        // Validate tồn kho trước khi đặt hàng
+        const invalidItems = cart.filter(item => item.quantity > item.stock)
+        if (invalidItems.length > 0) {
+            alert(`Một số sản phẩm vượt quá tồn kho:\n${invalidItems.map(i => `- ${i.name}: còn ${i.stock}, bạn đặt ${i.quantity}`).join('\n')}`)
+            return
+        }
+
+        // Kiểm tra sản phẩm hết hàng
+        const outOfStock = cart.filter(item => item.stock <= 0)
+        if (outOfStock.length > 0) {
+            alert(`Sản phẩm đã hết hàng:\n${outOfStock.map(i => `- ${i.name}`).join('\n')}`)
             return
         }
 

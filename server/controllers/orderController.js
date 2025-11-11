@@ -61,11 +61,20 @@ exports.create = async (req, res, next) => {
             return res.status(400).json({ message: 'Customer is required' })
         }
 
-        // Calculate total
+        // Validate stock và calculate total
         let total = 0
         for (const item of items) {
             const product = await Product.findById(item.product)
             if (!product) return res.status(400).json({ message: `Product ${item.product} not found` })
+
+            // Kiểm tra tồn kho
+            if (product.stock <= 0) {
+                return res.status(400).json({ message: `Product ${product.name} is out of stock` })
+            }
+            if (product.stock < item.qty) {
+                return res.status(400).json({ message: `Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${item.qty}` })
+            }
+
             total += item.qty * item.price
         }
 

@@ -90,6 +90,24 @@ export default function OrderCreate() {
             return
         }
 
+        // Validate stock for all items
+        const invalidItems = items.filter(item => {
+            const product = products.find(p => p._id === item.product)
+            return !product || product.stock <= 0 || product.stock < item.quantity
+        })
+
+        if (invalidItems.length > 0) {
+            const messages = invalidItems.map(item => {
+                const product = products.find(p => p._id === item.product)
+                if (!product || product.stock <= 0) {
+                    return `${product?.name || 'Sản phẩm'} đã hết hàng`
+                }
+                return `${product.name}: Chỉ còn ${product.stock} sản phẩm, không đủ cho số lượng ${item.quantity}`
+            })
+            alert(`Không thể tạo đơn hàng:\n${messages.join('\n')}`)
+            return
+        }
+
         try {
             await createOrder({
                 customer: customerId,
