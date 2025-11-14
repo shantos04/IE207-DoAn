@@ -38,3 +38,8 @@ export async function updateOrderStatus(id: string, status: string) {
 export async function deleteOrder(id: string) {
     await api.delete(`/orders/${id}`)
 }
+
+export async function cancelOrder(id: string) {
+    const { data } = await api.put(`/orders/${id}/cancel`)
+    return data as Order
+}

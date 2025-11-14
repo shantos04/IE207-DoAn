@@ -64,3 +64,37 @@ exports.inventoryReport = async (req, res, next) => {
         res.json({ products, totalValue, lowStock })
     } catch (e) { next(e) }
 }
+
+// Daily revenue aggregation for chart (confirmed, shipped, completed treated as revenue)
+exports.dailyRevenue = async (req, res, next) => {
+    try {
+        const { from, to } = req.query
+        const end = to ? new Date(to) : new Date()
+        const start = from ? new Date(from) : new Date(end.getTime() - 13 * 24 * 60 * 60 * 1000) // default 14 days window
+
+        // Normalize to start of day
+        start.setHours(0, 0, 0, 0)
+        end.setHours(23, 59, 59, 999)
+
+        // Use timezone (Vietnam +07:00) for grouping to avoid date shifting
+        const rows = await Order.aggregate([
+            { $match: { createdAt: { $gte: start, $lte: end }, status: { $in: ['confirmed', 'shipped', 'completed'] } } },
+            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: '+07:00' } }, revenue: { $sum: '$total' }, orders: { $sum: 1 } } },
+            { $sort: { _id: 1 } }
+        ])
+
+        // Build continuous date series
+        const map = Object.fromEntries(rows.map(r => [r._id, r]))
+        const days = []
+        const cursor = new Date(start)
+        while (cursor <= end) {
+            // Build key in local timezone +07:00
+            const isoLocal = new Date(cursor.getTime() - cursor.getTimezoneOffset() * 60000).toISOString().slice(0, 10)
+            const key = isoLocal
+            const row = map[key] || { _id: key, revenue: 0, orders: 0 }
+            days.push({ date: key, revenue: row.revenue, orders: row.orders })
+            cursor.setDate(cursor.getDate() + 1)
+        }
+        res.json({ from: start.toISOString().slice(0, 10), to: end.toISOString().slice(0, 10), days })
+    } catch (e) { next(e) }
+}

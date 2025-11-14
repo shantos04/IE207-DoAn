@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { listOrders, type Order } from '../services/orders'
+import { listOrders, cancelOrder, type Order } from '../services/orders'
 
 const statusText: Record<string, string> = {
     draft: 'Nháp',
@@ -81,10 +81,29 @@ export default function MyOrders() {
                                 )}
 
                                 <div className="flex justify-between items-center pt-3 border-t">
-                                    <span className="text-sm text-gray-600">Tổng cộng:</span>
-                                    <span className="text-lg font-bold text-primary-600">
-                                        {order.total.toLocaleString('vi-VN')}₫
-                                    </span>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-sm text-gray-600">Tổng cộng:</span>
+                                        <span className="text-lg font-bold text-primary-600">
+                                            {order.total.toLocaleString('vi-VN')}₫
+                                        </span>
+                                    </div>
+                                    {['draft', 'confirmed'].includes(order.status) && (
+                                        <button
+                                            onClick={async () => {
+                                                if (!window.confirm('Bạn chắc chắn muốn hủy đơn hàng này?')) return
+                                                try {
+                                                    const updated = await cancelOrder(order._id)
+                                                    // Cập nhật state
+                                                    setOrders(prev => prev.map(o => o._id === updated._id ? updated : o))
+                                                } catch (e: any) {
+                                                    alert(e?.response?.data?.message || 'Không thể hủy đơn')
+                                                }
+                                            }}
+                                            className="px-3 py-1.5 text-sm rounded bg-red-600 text-white hover:bg-red-700"
+                                        >
+                                            Hủy đơn
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}

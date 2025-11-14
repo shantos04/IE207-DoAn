@@ -140,3 +140,49 @@ exports.remove = async (req, res, next) => {
         res.json({ ok: true })
     } catch (e) { next(e) }
 }
+
+// Customer self-cancel draft order
+exports.cancelForCustomer = async (req, res, next) => {
+    try {
+        if (req.user.role !== 'customer') {
+            return res.status(403).json({ message: 'Chỉ khách hàng mới có thể hủy đơn của mình' })
+        }
+        const order = await Order.findById(req.params.id)
+        if (!order) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' })
+
+        // Resolve current customer profile from token
+        const Customer = require('../models/Customer')
+        const User = require('../models/User')
+        const user = await User.findById(req.user.sub)
+        const customer = await Customer.findOne({ email: user.email })
+        if (!customer) return res.status(400).json({ message: 'Không tìm thấy hồ sơ khách hàng' })
+
+        if (order.customer.toString() !== customer._id.toString()) {
+            return res.status(403).json({ message: 'Bạn không có quyền hủy đơn này' })
+        }
+        // Cho phép hủy nếu trạng thái là draft hoặc confirmed (chưa giao hàng)
+        if (!['draft', 'confirmed'].includes(order.status)) {
+            return res.status(400).json({ message: 'Không thể hủy đơn đã giao hoặc hoàn thành' })
+        }
+
+        // Nếu đã xác nhận (đã trừ tồn kho), cần hoàn trả tồn kho
+        if (order.status === 'confirmed') {
+            const populated = await Order.findById(order._id).populate('items.product')
+            for (const item of populated.items) {
+                await Product.findByIdAndUpdate(item.product._id, { $inc: { stock: item.qty } })
+                await InventoryMovement.create({
+                    type: 'in',
+                    product: item.product._id,
+                    qty: item.qty,
+                    refType: 'Order',
+                    refId: order._id.toString(),
+                    note: `Hoàn trả tồn kho do khách hủy đơn hàng ${order.code}`,
+                })
+            }
+        }
+
+        order.status = 'canceled'
+        await order.save()
+        res.json(order)
+    } catch (e) { next(e) }
+}

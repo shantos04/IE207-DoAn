@@ -5,5 +5,6 @@ const { verify } = require('../middleware/auth')
 router.get('/dashboard', verify, ctrl.dashboard)
 router.get('/sales', verify, ctrl.salesReport)
 router.get('/inventory', verify, ctrl.inventoryReport)
+router.get('/daily-revenue', verify, ctrl.dailyRevenue)
 
 module.exports = router

@@ -8,5 +8,6 @@ router.post('/', verify, ctrl.create)
 router.put('/:id', verify, ctrl.update)
 router.put('/:id/status', verify, ctrl.updateStatus)
 router.delete('/:id', verify, ctrl.remove)
+router.put('/:id/cancel', verify, ctrl.cancelForCustomer)
 
 module.exports = router
