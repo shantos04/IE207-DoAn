@@ -12,6 +12,8 @@ export type Product = {
     stock: number
     reorderPoint?: number
     supplier?: string
+    image?: string
+    description?: string
 }
 
 export async function listProducts(params?: { q?: string; page?: number; limit?: number }) {

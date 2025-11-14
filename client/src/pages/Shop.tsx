@@ -162,10 +162,39 @@ export default function Shop() {
                     <div className="p-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             {products.map(product => (
-                                <div key={product._id} className="card hover:shadow-md transition-shadow">
+                                <div key={product._id} className="card hover:shadow-md transition-shadow overflow-hidden">
+                                    {/* Hình ảnh sản phẩm */}
+                                    <div className="relative h-48 bg-gray-100">
+                                        {product.image ? (
+                                            <img
+                                                src={product.image}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                        )}
+                                        {/* Badge trạng thái góc trên phải */}
+                                        {product.stock > 0 ? (
+                                            <span className="absolute top-2 right-2 badge badge-green">
+                                                Còn {product.stock}
+                                            </span>
+                                        ) : (
+                                            <span className="absolute top-2 right-2 badge badge-red">
+                                                Hết hàng
+                                            </span>
+                                        )}
+                                    </div>
+
                                     <div className="p-4 space-y-3">
                                         <div>
-                                            <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                                            <h3 className="font-semibold text-gray-900 line-clamp-2" title={product.name}>
+                                                {product.name}
+                                            </h3>
                                             <p className="text-xs text-gray-500 mt-1">SKU: {product.sku}</p>
                                             {product.brand && (
                                                 <p className="text-xs text-gray-500">Hãng: {product.brand}</p>
@@ -175,18 +204,13 @@ export default function Shop() {
                                             <span className="text-lg font-bold text-primary-600">
                                                 {product.price.toLocaleString('vi-VN')}₫
                                             </span>
-                                            {product.stock > 0 ? (
-                                                <span className="badge badge-green">Còn {product.stock}</span>
-                                            ) : (
-                                                <span className="badge badge-red">Hết hàng</span>
-                                            )}
                                         </div>
                                         <button
                                             onClick={() => addToCart(product)}
                                             disabled={product.stock === 0}
-                                            className="btn btn-primary w-full"
+                                            className="btn btn-primary w-full disabled:bg-gray-300 disabled:cursor-not-allowed"
                                         >
-                                            Thêm vào giỏ
+                                            {product.stock > 0 ? 'Thêm vào giỏ' : 'Hết hàng'}
                                         </button>
                                     </div>
                                 </div>
@@ -216,6 +240,20 @@ export default function Shop() {
                                     <div className="space-y-3">
                                         {cart.map(item => (
                                             <div key={item._id} className="flex items-center gap-4 p-3 border rounded">
+                                                {/* Hình ảnh sản phẩm trong giỏ hàng */}
+                                                {item.image ? (
+                                                    <img
+                                                        src={item.image}
+                                                        alt={item.name}
+                                                        className="w-16 h-16 object-cover rounded border"
+                                                    />
+                                                ) : (
+                                                    <div className="w-16 h-16 bg-gray-200 rounded border flex items-center justify-center flex-shrink-0">
+                                                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </div>
+                                                )}
                                                 <div className="flex-1">
                                                     <h4 className="font-medium">{item.name}</h4>
                                                     <p className="text-sm text-gray-500">{item.price.toLocaleString('vi-VN')}₫</p>

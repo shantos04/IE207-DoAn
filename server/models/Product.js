@@ -12,6 +12,8 @@ const productSchema = new mongoose.Schema(
         stock: { type: Number, default: 0 },
         reorderPoint: { type: Number, default: 0 },
         supplier: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' },
+        image: String, // URL hoặc base64 của hình ảnh
+        description: String, // Mô tả sản phẩm
     },
     { timestamps: true }
 )
