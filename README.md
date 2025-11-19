@@ -4,7 +4,7 @@ Công nghệ:
 - Frontend: React + Vite + Tailwind CSS + React Router + Axios
 - Backend: Node.js + Express + MongoDB (Mongoose)
 
-Tính năng cốt lõi (giả định nếu báo cáo không khả dụng):
+Tính năng:
 - Quản lý sản phẩm (SKU, mã linh kiện, tồn kho, giá, nhà sản xuất)
 - Quản lý kho (nhập/xuất kho, điều chuyển, kiểm kê)
 - Quản lý đơn hàng bán (Báo giá, Đơn hàng, Hóa đơn, Trạng thái giao hàng)
