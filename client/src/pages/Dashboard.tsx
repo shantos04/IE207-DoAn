@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getDashboardStats, getDailyRevenue } from '../services/reports'
+import * as XLSX from 'xlsx'
 
 export default function Dashboard() {
     const [stats, setStats] = useState<any>(null)
@@ -35,11 +36,66 @@ export default function Dashboard() {
             .finally(() => setLoading(false))
     }, [navigate])
 
+    const handleExportExcel = () => {
+        const workbook = XLSX.utils.book_new()
+
+        // Sheet 1: Dashboard stats
+        const statsData = [
+            ['Chỉ số', 'Giá trị'],
+            ['Tổng sản phẩm', stats?.totalProducts || 0],
+            ['Đơn hàng hôm nay', stats?.ordersToday || 0],
+            ['Doanh thu tháng', stats?.revenueThisMonth || 0],
+            ['Sản phẩm sắp hết', stats?.lowStockCount || 0]
+        ]
+        const statsSheet = XLSX.utils.aoa_to_sheet(statsData)
+        XLSX.utils.book_append_sheet(workbook, statsSheet, 'Thống kê tổng quan')
+
+        // Sheet 2: Top products
+        if (stats?.topProducts?.length > 0) {
+            const topProductsData = [
+                ['STT', 'Tên sản phẩm', 'Số lượng đã bán', 'Doanh thu'],
+                ...stats.topProducts.map((item: any, idx: number) => [
+                    idx + 1,
+                    item.product?.name || 'N/A',
+                    item.totalQty,
+                    item.totalRevenue
+                ])
+            ]
+            const topProductsSheet = XLSX.utils.aoa_to_sheet(topProductsData)
+            XLSX.utils.book_append_sheet(workbook, topProductsSheet, 'Top 5 sản phẩm')
+        }
+
+        // Sheet 3: Daily revenue
+        if (revenueSeries.length > 0) {
+            const revenueData = [
+                ['Ngày', 'Doanh thu', 'Số đơn hàng'],
+                ...revenueSeries.map(d => [d.date, d.revenue, d.orders])
+            ]
+            const revenueSheet = XLSX.utils.aoa_to_sheet(revenueData)
+            XLSX.utils.book_append_sheet(workbook, revenueSheet, 'Doanh thu theo ngày')
+        }
+
+        // Export file
+        const fileName = `Bao-cao-${new Date().toISOString().slice(0, 10)}.xlsx`
+        XLSX.writeFile(workbook, fileName)
+    }
+
     if (loading) return <div className="p-4">Đang tải...</div>
 
     return (
         <div className="space-y-6">
-            <h2 className="text-lg font-semibold">Tổng quan</h2>
+            <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Tổng quan</h2>
+                <button
+                    onClick={handleExportExcel}
+                    className="btn btn-primary flex items-center gap-2"
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Tải báo cáo Excel
+                </button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard label="Tổng sản phẩm" value={stats?.totalProducts || 0} />
                 <StatCard label="Đơn hàng hôm nay" value={stats?.ordersToday || 0} />
@@ -47,20 +103,31 @@ export default function Dashboard() {
                 <StatCard label="Sản phẩm sắp hết" value={stats?.lowStockCount || 0} className="text-red-600" />
             </div>
 
-            <div className="bg-white rounded-lg border p-4">
-                <h3 className="font-medium mb-3">Top 5 sản phẩm bán chạy</h3>
-                {stats?.topProducts?.length > 0 ? (
-                    <div className="space-y-2">
-                        {stats.topProducts.map((item: any, idx: number) => (
-                            <div key={idx} className="flex justify-between items-center text-sm">
-                                <span>{item.product?.name}</span>
-                                <span className="font-medium text-primary-600">{item.totalQty} SP - ₫{item.totalRevenue.toLocaleString('vi-VN')}</span>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <p className="text-sm text-gray-500">Chưa có dữ liệu</p>
-                )}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="bg-white rounded-lg border p-4">
+                    <h3 className="font-medium mb-3">Top 5 sản phẩm bán chạy</h3>
+                    {stats?.topProducts?.length > 0 ? (
+                        <div className="space-y-2">
+                            {stats.topProducts.map((item: any, idx: number) => (
+                                <div key={idx} className="flex justify-between items-center text-sm">
+                                    <span>{item.product?.name}</span>
+                                    <span className="font-medium text-primary-600">{item.totalQty} SP - ₫{item.totalRevenue.toLocaleString('vi-VN')}</span>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-gray-500">Chưa có dữ liệu</p>
+                    )}
+                </div>
+
+                <div className="bg-white rounded-lg border p-4">
+                    <h3 className="font-medium mb-3">Biểu đồ sản phẩm đã bán</h3>
+                    {stats?.topProducts?.length > 0 ? (
+                        <ProductSalesChart data={stats.topProducts} />
+                    ) : (
+                        <p className="text-sm text-gray-500">Chưa có dữ liệu</p>
+                    )}
+                </div>
             </div>
 
             <div className="bg-white rounded-lg border p-4">
@@ -82,6 +149,70 @@ function StatCard({ label, value, className }: { label: string; value: string | 
         <div className="bg-white rounded-lg border p-4">
             <div className="text-sm text-gray-500">{label}</div>
             <div className={`mt-1 text-2xl font-semibold ${className || ''}`}>{value}</div>
+        </div>
+    )
+}
+
+function ProductSalesChart({ data }: { data: any[] }) {
+    const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']
+    const total = data.reduce((sum, item) => sum + item.totalQty, 0)
+    const maxQty = Math.max(...data.map(d => d.totalQty), 1)
+
+    const barHeight = 24
+    const barGap = 12
+    const maxBarWidth = 280
+    const labelWidth = 160
+    const chartHeight = data.length * (barHeight + barGap)
+
+    return (
+        <div className="space-y-4">
+            <svg viewBox={`0 0 ${labelWidth + maxBarWidth + 80} ${chartHeight}`} className="w-full">
+                {data.map((item, idx) => {
+                    const y = idx * (barHeight + barGap)
+                    const barWidth = (item.totalQty / maxQty) * maxBarWidth
+                    const percentage = ((item.totalQty / total) * 100).toFixed(1)
+
+                    return (
+                        <g key={idx}>
+                            {/* Product name */}
+                            <text
+                                x={0}
+                                y={y + barHeight / 2 + 4}
+                                className="fill-gray-700 text-xs font-medium"
+                            >
+                                {(item.product?.name || 'N/A').slice(0, 20)}
+                            </text>
+
+                            {/* Bar */}
+                            <rect
+                                x={labelWidth}
+                                y={y}
+                                width={barWidth}
+                                height={barHeight}
+                                fill={colors[idx % colors.length]}
+                                className="transition-all duration-300"
+                            />
+
+                            {/* Quantity and percentage */}
+                            <text
+                                x={labelWidth + barWidth + 8}
+                                y={y + barHeight / 2 + 4}
+                                className="fill-gray-600 text-xs"
+                            >
+                                {item.totalQty} SP ({percentage}%)
+                            </text>
+                        </g>
+                    )
+                })}
+            </svg>
+
+            {/* Summary */}
+            <div className="pt-3 border-t text-xs text-gray-600">
+                <div className="flex justify-between">
+                    <span>Tổng sản phẩm đã bán:</span>
+                    <span className="font-semibold">{total} SP</span>
+                </div>
+            </div>
         </div>
     )
 }
