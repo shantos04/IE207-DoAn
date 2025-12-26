@@ -11,7 +11,7 @@ const productSchema = new mongoose.Schema(
         cost: { type: Number, default: 0 },
         stock: { type: Number, default: 0 },
         reorderPoint: { type: Number, default: 0 },
-        supplier: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' },
+        supplier: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier', default: null },
         image: String, // URL hoặc base64 của hình ảnh
         description: String, // Mô tả sản phẩm
     },

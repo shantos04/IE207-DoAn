@@ -36,17 +36,42 @@ exports.get = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
     try {
-        const item = await Product.create(req.body)
+        // Handle empty supplier
+        const data = { ...req.body }
+        if (!data.supplier || data.supplier === '') {
+            data.supplier = null
+        }
+        const item = await Product.create(data)
         res.status(201).json(item)
     } catch (e) { next(e) }
 }
 
 exports.update = async (req, res, next) => {
     try {
-        const item = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        const { id } = req.params
+        const { sku, supplier } = req.body
+
+        // Check if SKU already exists in another product
+        if (sku) {
+            const existingProduct = await Product.findOne({ sku, _id: { $ne: id } })
+            if (existingProduct) {
+                return res.status(400).json({ message: 'SKU này đã tồn tại' })
+            }
+        }
+
+        // Handle empty supplier (convert empty string to null)
+        const updateData = { ...req.body }
+        if (!supplier || supplier === '') {
+            updateData.supplier = null
+        }
+
+        const item = await Product.findByIdAndUpdate(id, updateData, { new: true, runValidators: false })
         if (!item) return res.status(404).json({ message: 'Not found' })
         res.json(item)
-    } catch (e) { next(e) }
+    } catch (e) {
+        console.error('Update product error:', e)
+        next(e)
+    }
 }
 
 exports.remove = async (req, res, next) => {

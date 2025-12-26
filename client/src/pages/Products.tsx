@@ -37,6 +37,8 @@ export default function Products() {
         'Điện trở',
         'IC',
         'LED',
+        'Potentiometer',
+        'Relay',
         'Transistor',
         'Tụ điện'
     ]
@@ -404,14 +406,15 @@ function ProductFormModal({ product, suppliers, onClose, onSubmit }: ProductForm
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                         >
                             <option value="">Chọn danh mục</option>
-                            <option value="IC">IC - Vi mạch tích hợp</option>
-                            <option value="Resistor">Resistor - Điện trở</option>
-                            <option value="Capacitor">Capacitor - Tụ điện</option>
-                            <option value="Transistor">Transistor - Bóng bán dẫn</option>
-                            <option value="Diode">Diode - Điốt</option>
-                            <option value="Connector">Connector - Đầu nối</option>
-                            <option value="Sensor">Sensor - Cảm biến</option>
-                            <option value="Module">Module - Mô-đun</option>
+                            <option value="Crystal">Crystal</option>
+                            <option value="Diode">Diode</option>
+                            <option value="Điện trở">Điện trở</option>
+                            <option value="IC">IC</option>
+                            <option value="LED">LED</option>
+                            <option value="Potentiometer">Potentiometer</option>
+                            <option value="Relay">Relay</option>
+                            <option value="Transistor">Transistor</option>
+                            <option value="Tụ điện">Tụ điện</option>
                         </select>
                     </div>
 
