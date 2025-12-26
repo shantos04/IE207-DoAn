@@ -109,7 +109,7 @@ export default function Dashboard() {
                     {stats?.topProducts?.length > 0 ? (
                         <div className="space-y-2">
                             {stats.topProducts.map((item: any, idx: number) => (
-                                <div key={idx} className="flex justify-between items-center text-sm">
+                                <div key={`top-product-${item.product?._id || idx}`} className="flex justify-between items-center text-sm">
                                     <span>{item.product?.name}</span>
                                     <span className="font-medium text-primary-600">{item.totalQty} SP - ₫{item.totalRevenue.toLocaleString('vi-VN')}</span>
                                 </div>
@@ -173,7 +173,7 @@ function ProductSalesChart({ data }: { data: any[] }) {
                     const percentage = ((item.totalQty / total) * 100).toFixed(1)
 
                     return (
-                        <g key={idx}>
+                        <g key={`product-${item.name}`}>
                             {/* Product name */}
                             <text
                                 x={0}
@@ -255,10 +255,10 @@ function DailyRevenueChart({ data }: { data: { date: string; revenue: number; or
             <div className="overflow-x-auto">
                 <svg viewBox={`0 0 ${totalWidth} ${viewBoxHeight}`} className="w-full max-w-full">
                     {/* Grid lines & ticks */}
-                    {ticks.map(t => {
+                    {ticks.map((t, idx) => {
                         const y = chartHeight - (t / niceMax) * (chartHeight - 10)
                         return (
-                            <g key={t}>
+                            <g key={`tick-${t}-${idx}`}>
                                 <line x1={0} y1={y} x2={totalWidth} y2={y} className="stroke-gray-100" strokeWidth={1} />
                                 {t > 0 && (
                                     <text x={2} y={y - 2} className="fill-gray-400 text-[9px]" >₫{t.toLocaleString('vi-VN')}</text>
@@ -273,7 +273,7 @@ function DailyRevenueChart({ data }: { data: { date: string; revenue: number; or
                         const y = chartHeight - h
                         const isToday = d.date === todayKey
                         return (
-                            <g key={d.date}>
+                            <g key={`bar-${d.date}`}>
                                 <rect
                                     x={x}
                                     y={y}

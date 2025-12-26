@@ -40,3 +40,71 @@ exports.login = async (req, res, next) => {
         res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } })
     } catch (e) { next(e) }
 }
+
+exports.loginGoogle = async (req, res, next) => {
+    try {
+        const { credential } = req.body
+
+        // Decode JWT từ Google
+        const decoded = jwt.decode(credential)
+        if (!decoded || !decoded.email) {
+            return res.status(400).json({ message: 'Invalid Google token' })
+        }
+
+        // Tìm hoặc tạo user
+        let user = await User.findOne({ email: decoded.email })
+        if (!user) {
+            user = await User.create({
+                name: decoded.name || 'User',
+                email: decoded.email,
+                password: Math.random().toString(36).substring(7), // Random password for OAuth users
+                role: 'customer'
+            })
+
+            // Tạo customer record
+            await Customer.create({
+                name: user.name,
+                email: user.email,
+                phone: '',
+                address: '',
+                note: 'Đăng ký qua Google'
+            })
+        }
+
+        const token = signToken(user)
+        res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } })
+    } catch (e) { next(e) }
+}
+
+exports.loginFacebook = async (req, res, next) => {
+    try {
+        const { userID, name, email, accessToken } = req.body
+
+        if (!email) {
+            return res.status(400).json({ message: 'Email not provided by Facebook' })
+        }
+
+        // Tìm hoặc tạo user
+        let user = await User.findOne({ email })
+        if (!user) {
+            user = await User.create({
+                name: name || 'User',
+                email: email,
+                password: Math.random().toString(36).substring(7), // Random password for OAuth users
+                role: 'customer'
+            })
+
+            // Tạo customer record
+            await Customer.create({
+                name: user.name,
+                email: user.email,
+                phone: '',
+                address: '',
+                note: 'Đăng ký qua Facebook'
+            })
+        }
+
+        const token = signToken(user)
+        res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } })
+    } catch (e) { next(e) }
+}

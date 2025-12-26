@@ -203,7 +203,7 @@ export default function OrderCreate() {
                                 {items.map((item, index) => {
                                     const selectedProduct = products.find(p => p._id === item.product)
                                     return (
-                                        <tr key={index} className="border-b">
+                                        <tr key={`item-${item.product}-${index}`} className="border-b">
                                             <td className="p-2">
                                                 <select
                                                     value={item.product}

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import './App.css'
 
 import Login from './pages/Login'
@@ -23,32 +24,34 @@ function App() {
   }, [])
 
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID'}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <AppLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Dashboard />} />
-        <Route path="products" element={<Products />} />
-        <Route path="orders" element={<Orders />} />
-        <Route path="orders/create" element={<OrderCreate />} />
-        <Route path="suppliers" element={<Suppliers />} />
-        <Route path="customers" element={<Customers />} />
-        <Route path="inventory" element={<Inventory />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="shop" element={<Shop />} />
-        <Route path="my-orders" element={<MyOrders />} />
-      </Route>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="products" element={<Products />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="orders/create" element={<OrderCreate />} />
+          <Route path="suppliers" element={<Suppliers />} />
+          <Route path="customers" element={<Customers />} />
+          <Route path="inventory" element={<Inventory />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="shop" element={<Shop />} />
+          <Route path="my-orders" element={<MyOrders />} />
+        </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </GoogleOAuthProvider>
   )
 }
 

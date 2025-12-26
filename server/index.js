@@ -7,16 +7,29 @@ const { connectDB } = require('./config/db')
 
 const app = express()
 
-// Allow multiple origins via comma-separated CORS_ORIGIN
-const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
-    .split(',')
-    .map((o) => o.trim())
+// CORS configuration
+const isDevelopment = process.env.NODE_ENV !== 'production'
 
 app.use(
     cors({
         origin: (origin, callback) => {
-            if (!origin) return callback(null, true) // allow same-origin or curl
-            if (allowedOrigins.includes(origin)) return callback(null, true)
+            // Allow requests without origin (same-origin, curl, etc)
+            if (!origin) return callback(null, true)
+
+            // In development, allow all localhost origins
+            if (isDevelopment && origin.startsWith('http://localhost')) {
+                return callback(null, true)
+            }
+
+            // In production, check whitelist
+            if (!isDevelopment) {
+                const allowedOrigins = (process.env.CORS_ORIGIN || '').split(',').map((o) => o.trim())
+                if (allowedOrigins.includes(origin)) {
+                    return callback(null, true)
+                }
+            }
+
+            console.warn(`CORS blocked for origin: ${origin}`)
             return callback(new Error(`Not allowed by CORS: ${origin}`))
         },
         credentials: true,

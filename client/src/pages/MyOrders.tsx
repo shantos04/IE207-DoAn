@@ -63,7 +63,7 @@ export default function MyOrders() {
 
                                 <div className="space-y-2 mb-3">
                                     {order.items.map((item, idx) => (
-                                        <div key={idx} className="flex justify-between text-sm">
+                                        <div key={`${order._id}-${idx}`} className="flex justify-between text-sm">
                                             <span className="text-gray-700">
                                                 {typeof item.product === 'object' && item.product ? item.product.name : 'Sản phẩm'} × {item.qty}
                                             </span>

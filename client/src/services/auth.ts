@@ -9,3 +9,13 @@ export async function register(payload: { name: string; email: string; password:
     const { data } = await api.post('/auth/register', payload)
     return data as { token: string; user: { id: string; name: string; email: string; role: string } }
 }
+
+export async function loginWithGoogle(credential: string) {
+    const { data } = await api.post('/auth/google', { credential })
+    return data as { token: string; user: { id: string; name: string; email: string; role: string } }
+}
+
+export async function loginWithFacebook(accessToken: string, userID: string, name: string, email: string) {
+    const { data } = await api.post('/auth/facebook', { accessToken, userID, name, email })
+    return data as { token: string; user: { id: string; name: string; email: string; role: string } }
+}

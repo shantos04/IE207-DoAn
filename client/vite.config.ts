@@ -10,4 +10,7 @@ export default defineConfig({
       },
     }),
   ],
+  optimizeDeps: {
+    exclude: ['@react-oauth/google'],
+  },
 })
