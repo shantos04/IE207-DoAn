@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { listProducts, type Product } from '../services/products'
 import { createOrder } from '../services/orders'
+import { Navigate } from 'react-router-dom'
 
 interface CartItem extends Product {
     quantity: number
@@ -14,6 +15,7 @@ export default function Shop() {
     const [showCart, setShowCart] = useState(false)
     const [orderNote, setOrderNote] = useState('')
     const [submitting, setSubmitting] = useState(false)
+    const [userRole, setUserRole] = useState<string>('customer')
 
     const fetchProducts = async () => {
         setLoading(true)
@@ -27,7 +29,19 @@ export default function Shop() {
         }
     }
 
-    useEffect(() => { fetchProducts() }, [])
+    useEffect(() => {
+        // Decode JWT token to get user role
+        const token = localStorage.getItem('token')
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]))
+                setUserRole(payload.role || 'customer')
+            } catch (e) {
+                console.error('Failed to decode token', e)
+            }
+        }
+        fetchProducts()
+    }, [])
 
     const addToCart = (product: Product) => {
         // Kiểm tra tồn kho

@@ -2,14 +2,21 @@ const Product = require('../models/Product')
 
 exports.list = async (req, res, next) => {
     try {
-        const { q, page = 1, limit = 20 } = req.query
-        const filter = q ? {
-            $or: [
+        const { q, category, page = 1, limit = 20 } = req.query
+        const filter = {}
+
+        if (q) {
+            filter.$or = [
                 { name: new RegExp(q, 'i') },
                 { sku: new RegExp(q, 'i') },
                 { partNumber: new RegExp(q, 'i') },
             ]
-        } : {}
+        }
+
+        if (category && category !== '') {
+            filter.category = category
+        }
+
         const items = await Product.find(filter)
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)

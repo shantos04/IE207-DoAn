@@ -75,6 +75,9 @@ export default function AppLayout() {
                     <div className="font-medium text-gray-700">{getTitle(pathname)}</div>
                     <div className="flex items-center gap-3">
                         <span className="hidden sm:inline text-sm text-gray-500">Xin chào, User</span>
+                        {userRole === 'staff' && (
+                            <Link to="/shop" className="text-sm text-primary-700 hover:underline">🛒 Xem cửa hàng</Link>
+                        )}
                         <button onClick={logout} className="text-sm text-primary-700 hover:underline">Đăng xuất</button>
                     </div>
                 </header>

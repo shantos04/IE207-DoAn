@@ -16,7 +16,7 @@ export type Product = {
     description?: string
 }
 
-export async function listProducts(params?: { q?: string; page?: number; limit?: number }) {
+export async function listProducts(params?: { q?: string; category?: string; page?: number; limit?: number }) {
     const { data } = await api.get('/products', { params })
     return data as { items: Product[]; total: number }
 }

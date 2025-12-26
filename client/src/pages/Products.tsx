@@ -21,6 +21,8 @@ export default function Products() {
     const [items, setItems] = useState<Product[]>([])
     const [suppliers, setSuppliers] = useState<Supplier[]>([])
     const [q, setQ] = useState('')
+    const [category, setCategory] = useState('')
+    const [categories, setCategories] = useState<string[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [showModal, setShowModal] = useState(false)
@@ -30,7 +32,10 @@ export default function Products() {
         setLoading(true)
         setError(null)
         try {
-            const res = await listProducts(q ? { q } : undefined)
+            const params: any = {}
+            if (q) params.q = q
+            if (category) params.category = category
+            const res = await listProducts(params)
             setItems(res.items)
         } catch (e: any) {
             setError(e?.response?.data?.message ?? e?.message ?? 'Lỗi tải dữ liệu')
@@ -52,6 +57,14 @@ export default function Products() {
         fetchData()
         fetchSuppliers()
     }, [])
+
+    useEffect(() => {
+        // Extract unique categories from items
+        const uniqueCategories = Array.from(
+            new Set(items.filter(p => p.category).map(p => p.category))
+        ).sort() as string[]
+        setCategories(uniqueCategories)
+    }, [items])
 
     const handleAdd = () => {
         setEditingProduct(null)
@@ -99,14 +112,24 @@ export default function Products() {
                 </button>
             </div>
             <div className="bg-white rounded-lg border">
-                <div className="p-3 border-b flex items-center gap-2">
+                <div className="p-3 border-b flex flex-col md:flex-row items-center gap-2">
                     <input
                         value={q}
                         onChange={e => setQ(e.target.value)}
                         placeholder="Tìm theo tên, SKU, mã linh kiện"
-                        className="w-full md:w-96 rounded border-gray-300 px-3 py-2"
+                        className="w-full md:flex-1 rounded border-gray-300 px-3 py-2"
                     />
-                    <button onClick={fetchData} className="px-3 py-2 text-sm rounded bg-gray-100 hover:bg-gray-200">Tìm</button>
+                    <select
+                        value={category}
+                        onChange={e => setCategory(e.target.value)}
+                        className="w-full md:w-48 rounded border border-gray-300 px-3 py-2"
+                    >
+                        <option value="">Tất cả danh mục</option>
+                        {categories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                    </select>
+                    <button onClick={fetchData} className="px-3 py-2 text-sm rounded bg-gray-100 hover:bg-gray-200 w-full md:w-auto">Tìm</button>
                 </div>
                 {loading && <div className="p-4 text-sm text-gray-500">Đang tải...</div>}
                 {error && <div className="p-4 text-sm text-red-600">{error}</div>}
