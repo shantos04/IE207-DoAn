@@ -27,16 +27,20 @@ export default function Products() {
     const [error, setError] = useState<string | null>(null)
     const [showModal, setShowModal] = useState(false)
     const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+    const [page, setPage] = useState(1)
+    const [total, setTotal] = useState(0)
+    const limit = 20
 
     const fetchData = async () => {
         setLoading(true)
         setError(null)
         try {
-            const params: any = {}
+            const params: any = { page, limit }
             if (q) params.q = q
             if (category) params.category = category
             const res = await listProducts(params)
             setItems(res.items)
+            setTotal(res.total)
         } catch (e: any) {
             setError(e?.response?.data?.message ?? e?.message ?? 'Lỗi tải dữ liệu')
         } finally {
@@ -57,6 +61,10 @@ export default function Products() {
         fetchData()
         fetchSuppliers()
     }, [])
+
+    useEffect(() => {
+        fetchData()
+    }, [page])
 
     useEffect(() => {
         // Extract unique categories from items
@@ -129,7 +137,7 @@ export default function Products() {
                             <option key={cat} value={cat}>{cat}</option>
                         ))}
                     </select>
-                    <button onClick={fetchData} className="px-3 py-2 text-sm rounded bg-gray-100 hover:bg-gray-200 w-full md:w-auto">Tìm</button>
+                    <button onClick={() => { setPage(1); fetchData(); }} className="px-3 py-2 text-sm rounded bg-gray-100 hover:bg-gray-200 w-full md:w-auto">Tìm</button>
                 </div>
                 {loading && <div className="p-4 text-sm text-gray-500">Đang tải...</div>}
                 {error && <div className="p-4 text-sm text-red-600">{error}</div>}
@@ -200,6 +208,34 @@ export default function Products() {
                         {items.length === 0 && (
                             <div className="p-4 text-center text-sm text-gray-500">Không tìm thấy sản phẩm nào</div>
                         )}
+                    </div>
+                )}
+
+                {/* Pagination */}
+                {!loading && total > 0 && (
+                    <div className="p-3 border-t flex items-center justify-between">
+                        <div className="text-sm text-gray-600">
+                            Hiển thị {(page - 1) * limit + 1} - {Math.min(page * limit, total)} / {total} sản phẩm
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                disabled={page === 1}
+                                className="px-3 py-1 text-sm rounded border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Trước
+                            </button>
+                            <span className="text-sm text-gray-600">
+                                Trang {page} / {Math.ceil(total / limit)}
+                            </span>
+                            <button
+                                onClick={() => setPage(p => Math.min(Math.ceil(total / limit), p + 1))}
+                                disabled={page >= Math.ceil(total / limit)}
+                                className="px-3 py-1 text-sm rounded border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Sau
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
