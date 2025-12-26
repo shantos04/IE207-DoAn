@@ -22,7 +22,6 @@ export default function Products() {
     const [suppliers, setSuppliers] = useState<Supplier[]>([])
     const [q, setQ] = useState('')
     const [category, setCategory] = useState('')
-    const [categories, setCategories] = useState<string[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [showModal, setShowModal] = useState(false)
@@ -30,6 +29,17 @@ export default function Products() {
     const [page, setPage] = useState(1)
     const [total, setTotal] = useState(0)
     const limit = 20
+
+    // Fixed list of all available categories
+    const categories = [
+        'Crystal',
+        'Diode',
+        'Điện trở',
+        'IC',
+        'LED',
+        'Transistor',
+        'Tụ điện'
+    ]
 
     const fetchData = async () => {
         setLoading(true)
@@ -67,12 +77,9 @@ export default function Products() {
     }, [page])
 
     useEffect(() => {
-        // Extract unique categories from items
-        const uniqueCategories = Array.from(
-            new Set(items.filter(p => p.category).map(p => p.category))
-        ).sort() as string[]
-        setCategories(uniqueCategories)
-    }, [items])
+        // Reset to page 1 and fetch when search or category changes
+        setPage(1)
+    }, [q, category])
 
     const handleAdd = () => {
         setEditingProduct(null)
@@ -137,7 +144,7 @@ export default function Products() {
                             <option key={cat} value={cat}>{cat}</option>
                         ))}
                     </select>
-                    <button onClick={() => { setPage(1); fetchData(); }} className="px-3 py-2 text-sm rounded bg-gray-100 hover:bg-gray-200 w-full md:w-auto">Tìm</button>
+                    <button onClick={fetchData} className="px-3 py-2 text-sm rounded bg-gray-100 hover:bg-gray-200 w-full md:w-auto">Tìm</button>
                 </div>
                 {loading && <div className="p-4 text-sm text-gray-500">Đang tải...</div>}
                 {error && <div className="p-4 text-sm text-red-600">{error}</div>}
