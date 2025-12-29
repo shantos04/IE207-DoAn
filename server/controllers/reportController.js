@@ -5,8 +5,10 @@ const InventoryMovement = require('../models/InventoryMovement')
 exports.dashboard = async (req, res, next) => {
     try {
         const totalProducts = await Product.countDocuments()
+        const outOfStock = await Product.countDocuments({ status: 'out_of_stock' })
         const lowStockCount = await Product.countDocuments({
-            $expr: { $lte: ['$stock', '$reorderPoint'] }
+            $expr: { $lte: ['$stock', '$minStockLevel'] },
+            status: { $ne: 'out_of_stock' }
         })
 
         const today = new Date()
@@ -16,14 +18,14 @@ exports.dashboard = async (req, res, next) => {
         const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1)
         const orders = await Order.find({
             createdAt: { $gte: thisMonth },
-            status: { $in: ['confirmed', 'shipped', 'completed'] }
+            status: { $in: ['confirmed', 'processing', 'shipped', 'completed'] }
         })
         const revenueThisMonth = orders.reduce((sum, o) => sum + o.total, 0)
 
         const topProducts = await Order.aggregate([
-            { $match: { status: { $in: ['confirmed', 'shipped', 'completed'] } } },
+            { $match: { status: { $in: ['confirmed', 'processing', 'shipped', 'completed'] } } },
             { $unwind: '$items' },
-            { $group: { _id: '$items.product', totalQty: { $sum: '$items.qty' }, totalRevenue: { $sum: { $multiply: ['$items.qty', '$items.price'] } } } },
+            { $group: { _id: '$items.product', totalQty: { $sum: '$items.qty' }, totalRevenue: { $sum: '$items.subtotal' } } },
             { $sort: { totalRevenue: -1 } },
             { $limit: 5 },
             { $lookup: { from: 'products', localField: '_id', foreignField: '_id', as: 'product' } },
@@ -32,6 +34,7 @@ exports.dashboard = async (req, res, next) => {
 
         res.json({
             totalProducts,
+            outOfStock,
             lowStockCount,
             ordersToday,
             revenueThisMonth,
@@ -43,7 +46,7 @@ exports.dashboard = async (req, res, next) => {
 exports.salesReport = async (req, res, next) => {
     try {
         const { startDate, endDate } = req.query
-        const filter = { status: { $in: ['confirmed', 'shipped', 'completed'] } }
+        const filter = { status: { $in: ['confirmed', 'processing', 'shipped', 'completed'] } }
         if (startDate) filter.createdAt = { $gte: new Date(startDate) }
         if (endDate) filter.createdAt = { ...filter.createdAt, $lte: new Date(endDate) }
 
@@ -59,9 +62,10 @@ exports.inventoryReport = async (req, res, next) => {
     try {
         const products = await Product.find().sort({ stock: 1 })
         const totalValue = products.reduce((sum, p) => sum + (p.stock * p.cost), 0)
-        const lowStock = products.filter(p => p.stock <= p.reorderPoint)
+        const lowStock = products.filter(p => p.stock > 0 && p.stock <= p.minStockLevel)
+        const outOfStock = products.filter(p => p.stock <= 0)
 
-        res.json({ products, totalValue, lowStock })
+        res.json({ products, totalValue, lowStock, outOfStock })
     } catch (e) { next(e) }
 }
 
@@ -78,7 +82,7 @@ exports.dailyRevenue = async (req, res, next) => {
 
         // Use timezone (Vietnam +07:00) for grouping to avoid date shifting
         const rows = await Order.aggregate([
-            { $match: { createdAt: { $gte: start, $lte: end }, status: { $in: ['confirmed', 'shipped', 'completed'] } } },
+            { $match: { createdAt: { $gte: start, $lte: end }, status: { $in: ['confirmed', 'processing', 'shipped', 'completed'] } } },
             { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: '+07:00' } }, revenue: { $sum: '$total' }, orders: { $sum: 1 } } },
             { $sort: { _id: 1 } }
         ])
@@ -96,5 +100,19 @@ exports.dailyRevenue = async (req, res, next) => {
             cursor.setDate(cursor.getDate() + 1)
         }
         res.json({ from: start.toISOString().slice(0, 10), to: end.toISOString().slice(0, 10), days })
+    } catch (e) { next(e) }
+}
+
+// Low stock alerts
+exports.lowStockAlert = async (req, res, next) => {
+    try {
+        const lowStock = await Product.find({
+            $expr: { $lte: ['$stock', '$minStockLevel'] },
+            status: { $ne: 'discontinued' }
+        })
+            .sort({ stock: 1 })
+            .populate('supplier', 'name email phone')
+
+        res.json({ items: lowStock, count: lowStock.length })
     } catch (e) { next(e) }
 }

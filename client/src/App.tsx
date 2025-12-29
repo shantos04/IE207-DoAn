@@ -23,36 +23,45 @@ function App() {
     document.title = 'ERP Linh kiện điện tử'
   }, [])
 
-  return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID'}>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'PLACEHOLDER'
+  const hasValidGoogleId = googleClientId && googleClientId !== 'PLACEHOLDER' && !googleClientId.includes('YOUR_')
 
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Dashboard />} />
-          <Route path="products" element={<Products />} />
-          <Route path="orders" element={<Orders />} />
-          <Route path="orders/create" element={<OrderCreate />} />
-          <Route path="suppliers" element={<Suppliers />} />
-          <Route path="customers" element={<Customers />} />
-          <Route path="inventory" element={<Inventory />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="shop" element={<Shop />} />
-          <Route path="my-orders" element={<MyOrders />} />
-        </Route>
+  const appContent = (
+    <Routes>
+      <Route path="/login" element={<Login hasGoogleOAuth={hasValidGoogleId} />} />
+      <Route path="/register" element={<Register />} />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </GoogleOAuthProvider>
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Dashboard />} />
+        <Route path="products" element={<Products />} />
+        <Route path="orders" element={<Orders />} />
+        <Route path="orders/create" element={<OrderCreate />} />
+        <Route path="suppliers" element={<Suppliers />} />
+        <Route path="customers" element={<Customers />} />
+        <Route path="inventory" element={<Inventory />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="shop" element={<Shop />} />
+        <Route path="my-orders" element={<MyOrders />} />
+      </Route>
+    </Routes>
   )
+
+  if (hasValidGoogleId) {
+    return (
+      <GoogleOAuthProvider clientId={googleClientId}>
+        {appContent}
+      </GoogleOAuthProvider>
+    )
+  } else {
+    return appContent
+  }
 }
 
 export default App

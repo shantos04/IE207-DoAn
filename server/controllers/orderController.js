@@ -43,7 +43,7 @@ exports.get = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
     try {
-        let { customer, items, note } = req.body
+        let { customer, items, note, paymentMethod, shippingAddress, discount, tax, shippingFee } = req.body
 
         // Nếu user là customer, tự động gán customer từ email
         if (req.user.role === 'customer') {
@@ -62,7 +62,8 @@ exports.create = async (req, res, next) => {
         }
 
         // Validate stock và calculate total
-        let total = 0
+        let itemsTotal = 0
+        const processedItems = []
         for (const item of items) {
             const product = await Product.findById(item.product)
             if (!product) return res.status(400).json({ message: `Product ${item.product} not found` })
@@ -75,14 +76,42 @@ exports.create = async (req, res, next) => {
                 return res.status(400).json({ message: `Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${item.qty}` })
             }
 
-            total += item.qty * item.price
+            const subtotal = item.qty * item.price
+            itemsTotal += subtotal
+            processedItems.push({
+                product: item.product,
+                qty: item.qty,
+                price: item.price,
+                subtotal
+            })
         }
+
+        // Calculate final total
+        const finalDiscount = discount || 0
+        const finalTax = tax || 0
+        const finalShippingFee = shippingFee || 0
+        const total = itemsTotal - finalDiscount + finalTax + finalShippingFee
 
         // Generate order code
         const count = await Order.countDocuments()
         const code = `ORD${String(count + 1).padStart(6, '0')}`
 
-        const order = await Order.create({ code, customer, items, total, note, status: 'draft' })
+        const orderData = {
+            code,
+            customer,
+            items: processedItems,
+            total,
+            note,
+            status: 'draft',
+            paymentMethod: paymentMethod || 'cash',
+            shippingAddress,
+            discount: finalDiscount,
+            tax: finalTax,
+            shippingFee: finalShippingFee,
+            processedBy: req.user.sub
+        }
+
+        const order = await Order.create(orderData)
         res.status(201).json(order)
     } catch (e) { next(e) }
 }

@@ -2,7 +2,7 @@ const Product = require('../models/Product')
 
 exports.list = async (req, res, next) => {
     try {
-        const { q, category, page = 1, limit = 20 } = req.query
+        const { q, category, brand, status, lowStock, page = 1, limit = 20 } = req.query
         const filter = {}
 
         if (q) {
@@ -10,6 +10,7 @@ exports.list = async (req, res, next) => {
                 { name: new RegExp(q, 'i') },
                 { sku: new RegExp(q, 'i') },
                 { partNumber: new RegExp(q, 'i') },
+                { manufacturer: new RegExp(q, 'i') },
             ]
         }
 
@@ -17,7 +18,20 @@ exports.list = async (req, res, next) => {
             filter.category = category
         }
 
+        if (brand && brand !== '') {
+            filter.brand = brand
+        }
+
+        if (status && status !== '') {
+            filter.status = status
+        }
+
+        if (lowStock === 'true') {
+            filter.$expr = { $lte: ['$stock', '$minStockLevel'] }
+        }
+
         const items = await Product.find(filter)
+            .populate('supplier', 'name')
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(Number(limit))

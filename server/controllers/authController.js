@@ -8,21 +8,20 @@ function signToken(user) {
 
 exports.register = async (req, res, next) => {
     try {
-        const { name, email, password, role, phone, address } = req.body
+        const { name, email, password, phone, address } = req.body
 
-        // Tạo user
-        const user = await User.create({ name, email, password, role: role || 'customer', phone, address })
+        // Tạo user - luôn là customer khi đăng ký công khai
+        const user = await User.create({ name, email, password, role: 'customer', phone, address })
 
-        // Nếu là customer, tự động tạo bản ghi Customer
-        if (user.role === 'customer') {
-            await Customer.create({
-                name: user.name,
-                email: user.email,
-                phone: user.phone || '',
-                address: user.address || '',
-                note: 'Tự đăng ký qua hệ thống'
-            })
-        }
+        // Tự động tạo bản ghi Customer
+        await Customer.create({
+            name: user.name,
+            email: user.email,
+            phone: user.phone || '',
+            address: user.address || '',
+            customerType: 'individual',
+            note: 'Tự đăng ký qua hệ thống'
+        })
 
         const token = signToken(user)
         res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } })
@@ -54,6 +53,7 @@ exports.loginGoogle = async (req, res, next) => {
         // Tìm hoặc tạo user
         let user = await User.findOne({ email: decoded.email })
         if (!user) {
+            // Tạo user mới với role customer
             user = await User.create({
                 name: decoded.name || 'User',
                 email: decoded.email,
@@ -70,6 +70,15 @@ exports.loginGoogle = async (req, res, next) => {
                 note: 'Đăng ký qua Google'
             })
         }
+        // NOTE: Tạm comment kiểm tra role để test - sẽ bật lại sau
+        // else {
+        //     // Kiểm tra role - chỉ cho phép customer đăng nhập bằng OAuth
+        //     if (user.role !== 'customer') {
+        //         return res.status(403).json({
+        //             message: 'Đăng nhập Google chỉ dành cho khách hàng. Vui lòng sử dụng email/mật khẩu để đăng nhập với tư cách quản trị viên.'
+        //         })
+        //     }
+        // }
 
         const token = signToken(user)
         res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } })
@@ -87,6 +96,7 @@ exports.loginFacebook = async (req, res, next) => {
         // Tìm hoặc tạo user
         let user = await User.findOne({ email })
         if (!user) {
+            // Tạo user mới với role customer
             user = await User.create({
                 name: name || 'User',
                 email: email,
@@ -102,6 +112,13 @@ exports.loginFacebook = async (req, res, next) => {
                 address: '',
                 note: 'Đăng ký qua Facebook'
             })
+        } else {
+            // Kiểm tra role - chỉ cho phép customer đăng nhập bằng OAuth
+            if (user.role !== 'customer') {
+                return res.status(403).json({
+                    message: 'Đăng nhập Facebook chỉ dành cho khách hàng. Vui lòng sử dụng email/mật khẩu để đăng nhập với tư cách quản trị viên.'
+                })
+            }
         }
 
         const token = signToken(user)
