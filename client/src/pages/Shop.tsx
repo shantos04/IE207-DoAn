@@ -213,39 +213,67 @@ export default function Shop() {
 
                 {/* Top bar */}
                 <div className="sticky top-0 z-40 backdrop-blur bg-white/90 border-b">
-                    <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6">
-                        <div className="shrink-0">
-                            <p className="text-xs uppercase tracking-[0.2em] text-indigo-500 font-semibold">Tech Store</p>
-                            <h1 className="text-2xl font-bold text-gray-900">Cửa hàng linh kiện điện tử</h1>
-                        </div>
-                        <nav className="flex-1 hidden md:block">
-                            <ul className="flex items-center gap-4 text-sm font-semibold text-gray-600">
-                                <li><a href="#hero" className="hover:text-indigo-600">Trang chủ</a></li>
-                                <li><a href="#filters" className="hover:text-indigo-600">Bộ lọc</a></li>
-                                <li><a href="#products" className="hover:text-indigo-600">Danh sách</a></li>
-                                <li><a href="#cart" className="hover:text-indigo-600">Giỏ hàng</a></li>
-                            </ul>
-                        </nav>
-                        <div className="md:hidden flex-1 overflow-x-auto">
-                            <ul className="flex items-center gap-3 text-sm font-semibold text-gray-600 whitespace-nowrap">
-                                <li><a href="#hero" className="hover:text-indigo-600">Trang chủ</a></li>
-                                <li><a href="#filters" className="hover:text-indigo-600">Bộ lọc</a></li>
-                                <li><a href="#products" className="hover:text-indigo-600">Danh sách</a></li>
-                                <li><a href="#cart" className="hover:text-indigo-600">Giỏ hàng</a></li>
-                            </ul>
-                        </div>
+                    <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3 sm:gap-4">
                         <div className="flex items-center gap-3 shrink-0">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-indigo-500 font-semibold">Tech Store</p>
+                                <h1 className="text-2xl font-bold text-gray-900">Cửa hàng linh kiện</h1>
+                            </div>
+                            <a
+                                href="#filters"
+                                className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm font-semibold text-gray-700 hover:border-indigo-300 hover:text-indigo-700 bg-white"
+                                title="Danh mục sản phẩm"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h10M4 18h6" />
+                                </svg>
+                                Danh mục
+                            </a>
+                        </div>
+
+                        <div className="flex-1">
+                            <div className="relative">
+                                <input
+                                    value={q}
+                                    onChange={e => setQ(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && fetchProducts()}
+                                    placeholder="Tìm kiếm sản phẩm, SKU, danh mục..."
+                                    className="input h-11 w-full pl-10 pr-24 text-sm"
+                                />
+                                <svg className="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <button
+                                    onClick={fetchProducts}
+                                    className="absolute right-1 top-1 h-9 px-4 rounded-lg bg-indigo-600 text-white text-sm font-semibold shadow-sm hover:bg-indigo-700"
+                                >
+                                    Tìm kiếm
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                            <a href="#flash-sale" className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-pink-50 text-pink-700 text-sm font-semibold border border-pink-100 hover:border-pink-200">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M11.3 1.046a1 1 0 011.736.928l-1.5 4.026H15a1 1 0 01.8 1.6l-6 8a1 1 0 01-1.737-.928l1.5-4.026H7a1 1 0 01-.8-1.6l6-8z" />
+                                </svg>
+                                Flash Sale
+                            </a>
+                            <Link to="/my-orders" className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm font-semibold text-gray-700 hover:border-indigo-300 hover:text-indigo-700">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Tài khoản
+                            </Link>
                             <button
                                 onClick={() => setShowCart(true)}
                                 className="relative btn btn-primary shadow-md"
                                 id="cart"
+                                title="Giỏ hàng"
                             >
-                                <span className="flex items-center gap-2">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                    Giỏ hàng
-                                </span>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
                                 {getTotalItems() > 0 && (
                                     <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
                                         {getTotalItems()}
@@ -271,32 +299,6 @@ export default function Shop() {
                                 Khám phá kho linh kiện điện tử đa dạng, cập nhật liên tục. Lọc nhanh theo danh mục, giá và tồn kho, giống trải nghiệm duyệt sản phẩm trên Shopee.
                             </p>
 
-                            <div className="bg-white shadow-lg rounded-2xl p-4 border border-indigo-50">
-                                <div className="flex flex-col sm:flex-row gap-3">
-                                    <div className="flex-1 relative">
-                                        <input
-                                            value={q}
-                                            onChange={e => setQ(e.target.value)}
-                                            onKeyDown={e => e.key === 'Enter' && fetchProducts()}
-                                            placeholder="Tìm nhanh tên, SKU, danh mục..."
-                                            className="input w-full pl-10 h-12 text-base"
-                                        />
-                                        <svg className="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                    </div>
-                                    <button onClick={fetchProducts} className="btn btn-primary h-12 px-6 text-base shadow-md">
-                                        Tìm kiếm
-                                    </button>
-                                </div>
-                                <div className="flex flex-wrap gap-2 mt-3 text-sm text-gray-500">
-                                    <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700">PCB</span>
-                                    <span className="px-3 py-1 rounded-full bg-pink-50 text-pink-700">Sensor</span>
-                                    <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700">Module nguồn</span>
-                                    <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700">Vi điều khiển</span>
-                                </div>
-                            </div>
-
                             <div className="grid sm:grid-cols-3 gap-3">
                                 {heroStats.map(stat => (
                                     <div key={stat.label} className="bg-white/80 backdrop-blur border border-indigo-50 rounded-2xl px-4 py-3 shadow-sm">
@@ -307,7 +309,7 @@ export default function Shop() {
                             </div>
                         </div>
 
-                        <div className="relative">
+                        <div id="flash-sale" className="relative">
                             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-pink-500 rounded-3xl blur-3xl opacity-30" aria-hidden />
                             <div className="relative bg-white border border-indigo-100 rounded-3xl shadow-2xl p-6 space-y-4">
                                 <div className="flex items-center gap-3">
