@@ -9,10 +9,13 @@ const productSchema = new mongoose.Schema(
         manufacturer: String, // Nhà sản xuất
         category: String, // Danh mục sản phẩm
         price: { type: Number, default: 0 }, // Giá bán
+        wholesalePrice: { type: Number, default: 0 }, // Giá bán sỉ
         cost: { type: Number, default: 0 }, // Giá vốn
         stock: { type: Number, default: 0 }, // Tồn kho
         reorderPoint: { type: Number, default: 0 }, // Mức tồn kho tối thiểu
         minStockLevel: { type: Number, default: 10 }, // Ngưỡng cảnh báo tồn kho thấp
+        unit: { type: String, default: 'pcs' }, // Đơn vị tính
+        binLocation: { type: String, default: '' }, // Vị trí kệ/kho (Bin Location)
         status: { type: String, enum: ['available', 'out_of_stock', 'discontinued'], default: 'available' }, // Trạng thái sản phẩm
         supplier: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier', default: null },
         image: String, // URL hoặc base64 của hình ảnh

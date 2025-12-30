@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { listCustomers, createCustomer, updateCustomer, deleteCustomer, type Customer } from '../services/customers'
+import { listCustomers, updateCustomer, deleteCustomer, type Customer } from '../services/customers'
 
 export default function Customers() {
     const [items, setItems] = useState<Customer[]>([])
@@ -36,7 +36,6 @@ export default function Customers() {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Khách hàng</h2>
-                <button onClick={() => { setEditItem(null); setShowForm(true) }} className="px-3 py-2 text-sm rounded bg-primary-600 text-white">Thêm khách hàng</button>
             </div>
             <div className="card">
                 <div className="card-header">
@@ -93,8 +92,11 @@ function CustomerForm({ item, onClose, onSaved }: { item: Customer | null; onClo
         e.preventDefault()
         setLoading(true)
         try {
-            if (item) await updateCustomer(item._id, form)
-            else await createCustomer(form)
+            if (!item) {
+                alert('Chức năng thêm khách hàng đã được tắt. Chỉ cho phép chỉnh sửa khách hàng hiện có.')
+                return
+            }
+            await updateCustomer(item._id, form)
             onSaved()
         } catch (err: any) {
             alert(err?.response?.data?.message || 'Lỗi')

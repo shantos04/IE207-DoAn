@@ -36,6 +36,14 @@ export default function Dashboard() {
             .finally(() => setLoading(false))
     }, [navigate])
 
+    const revenueToday = revenueSeries.length > 0 ? revenueSeries[revenueSeries.length - 1].revenue : 0
+    const ordersPending = stats?.ordersPending ?? stats?.ordersToday ?? 0
+    const lowStockCount = stats?.lowStockCount ?? 0
+    const notifications: { title: string; detail: string }[] = []
+    if (ordersPending > 0) notifications.push({ title: 'Đơn hàng chờ xử lý', detail: `${ordersPending} đơn cần xác nhận/giao` })
+    if (lowStockCount > 0) notifications.push({ title: 'Cảnh báo tồn kho thấp', detail: `${lowStockCount} sản phẩm dưới ngưỡng` })
+    if (revenueToday > 0) notifications.push({ title: 'Doanh thu hôm nay', detail: `₫${revenueToday.toLocaleString('vi-VN')}` })
+
     const handleExportExcel = () => {
         const workbook = XLSX.utils.book_new()
 
@@ -97,13 +105,13 @@ export default function Dashboard() {
                 </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard label="Doanh thu hôm nay" value={`₫ ${revenueToday.toLocaleString('vi-VN')}`} />
+                <StatCard label="Đơn hàng chờ xử lý" value={ordersPending} />
+                <StatCard label="Sản phẩm sắp hết" value={lowStockCount} className="text-red-600" />
                 <StatCard label="Tổng sản phẩm" value={stats?.totalProducts || 0} />
-                <StatCard label="Đơn hàng hôm nay" value={stats?.ordersToday || 0} />
-                <StatCard label="Doanh thu (tháng)" value={`₫ ${(stats?.revenueThisMonth || 0).toLocaleString('vi-VN')}`} />
-                <StatCard label="Sản phẩm sắp hết" value={stats?.lowStockCount || 0} className="text-red-600" />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="bg-white rounded-lg border p-4">
                     <h3 className="font-medium mb-3">Top 5 sản phẩm bán chạy</h3>
                     {stats?.topProducts?.length > 0 ? (
@@ -126,6 +134,22 @@ export default function Dashboard() {
                         <ProductSalesChart data={stats.topProducts} />
                     ) : (
                         <p className="text-sm text-gray-500">Chưa có dữ liệu</p>
+                    )}
+                </div>
+
+                <div className="bg-white rounded-lg border p-4">
+                    <h3 className="font-medium mb-3">Thông báo hệ thống</h3>
+                    {notifications.length > 0 ? (
+                        <ul className="space-y-2 text-sm text-gray-700">
+                            {notifications.map((n, idx) => (
+                                <li key={idx} className="p-2 rounded border border-gray-100 bg-gray-50">
+                                    <div className="font-semibold">{n.title}</div>
+                                    <div className="text-gray-600">{n.detail}</div>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="text-sm text-gray-500">Không có thông báo</p>
                     )}
                 </div>
             </div>

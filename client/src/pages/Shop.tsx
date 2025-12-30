@@ -19,6 +19,8 @@ export default function Shop() {
     const [orderNote, setOrderNote] = useState('')
     const [submitting, setSubmitting] = useState(false)
     const [userRole, setUserRole] = useState<string>('customer')
+    const [currentPage, setCurrentPage] = useState(1)
+    const pageSize = 24
 
     // Filter & Sort states
     const [selectedCategory, setSelectedCategory] = useState<string>('all')
@@ -32,7 +34,9 @@ export default function Shop() {
     const fetchProducts = async () => {
         setLoading(true)
         try {
-            const res = await listProducts(q ? { q } : undefined)
+            const params: any = { page: 1, limit: 500 }
+            if (q) params.q = q
+            const res = await listProducts(params)
             setProducts(res.items)
             setFilteredProducts(res.items)
         } catch (e) {
@@ -75,6 +79,63 @@ export default function Shop() {
 
         setFilteredProducts(filtered)
     }, [products, selectedCategory, priceRange, sortBy])
+
+    useEffect(() => {
+        // Reset về trang đầu khi bộ lọc thay đổi
+        setCurrentPage(1)
+    }, [selectedCategory, priceRange, sortBy, q])
+
+    const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize))
+    const currentPageProducts = useMemo(
+        () => filteredProducts.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+        [filteredProducts, currentPage, pageSize]
+    )
+
+    const handleSetPage = (page: number) => {
+        const next = Math.min(Math.max(1, page), totalPages)
+        if (next === currentPage) return
+        setCurrentPage(next)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    useEffect(() => {
+        // Clamp current page when filters shrink the result set
+        setCurrentPage(p => Math.min(Math.max(1, p), totalPages))
+    }, [totalPages])
+
+    useEffect(() => {
+        // Keep page in range when the dataset changes directly
+        if ((currentPage - 1) * pageSize >= filteredProducts.length) {
+            setCurrentPage(1)
+        }
+    }, [filteredProducts.length])
+
+    const paginationItems = useMemo(() => {
+        const pages: Array<number | 'ellipsis'> = []
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i)
+        } else {
+            const nearStart = currentPage <= 4
+            const nearEnd = currentPage >= totalPages - 3
+
+            if (nearStart) {
+                for (let i = 1; i <= 5; i++) pages.push(i)
+                pages.push('ellipsis')
+                pages.push(totalPages)
+            } else if (nearEnd) {
+                pages.push(1)
+                pages.push('ellipsis')
+                for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i)
+            } else {
+                pages.push(1)
+                pages.push('ellipsis')
+                for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i)
+                pages.push('ellipsis')
+                pages.push(totalPages)
+            }
+        }
+        return pages
+    }, [currentPage, totalPages])
 
     const categories = useMemo(
         () => Array.from(new Set(products.map(p => p.category).filter(Boolean))),
@@ -209,7 +270,7 @@ export default function Shop() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
             <div className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.15),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.12),transparent_25%)]" aria-hidden />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.15),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.12),transparent_25%)] pointer-events-none" aria-hidden />
 
                 {/* Top bar */}
                 <div className="sticky top-0 z-40 backdrop-blur bg-white/90 border-b">
@@ -389,6 +450,7 @@ export default function Shop() {
                     <div id="products" className="bg-white/90 backdrop-blur border border-gray-100 shadow-md rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
                         <div className="text-sm text-gray-600">
                             Hiển thị <span className="font-semibold text-gray-900">{filteredProducts.length}</span> sản phẩm
+                            <span className="ml-2 text-xs text-gray-500">Trang {currentPage}/{totalPages}</span>
                         </div>
                         <div className="flex items-center gap-3">
                             <select
@@ -461,8 +523,8 @@ export default function Shop() {
                     )}
 
                     {!loading && filteredProducts.length > 0 && viewMode === 'grid' && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                            {filteredProducts.map(product => (
+                        <div key={currentPage} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                            {currentPageProducts.map(product => (
                                 <Link
                                     key={product._id}
                                     to={`/shop/${product._id}`}
@@ -529,9 +591,55 @@ export default function Shop() {
                         </div>
                     )}
 
+                    {!loading && filteredProducts.length > 0 && (
+                        <nav className="flex items-center justify-between gap-4 mt-2 relative z-10" aria-label="Phân trang sản phẩm">
+                            <div className="text-sm text-gray-600">
+                                Hiển thị {Math.min((currentPage - 1) * pageSize + 1, filteredProducts.length)} - {Math.min(currentPage * pageSize, filteredProducts.length)} / {filteredProducts.length}
+                            </div>
+                            <div className="flex items-center gap-2 pointer-events-auto">
+                                <button
+                                    type="button"
+                                    onClick={() => handleSetPage(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="px-3 py-1 text-sm rounded border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Trước
+                                </button>
+
+                                {paginationItems.map((item, idx) =>
+                                    item === 'ellipsis' ? (
+                                        <span key={`ellipsis-${idx}`} className="px-2 text-sm text-gray-500">…</span>
+                                    ) : (
+                                        <button
+                                            key={item}
+                                            type="button"
+                                            onClick={() => handleSetPage(item)}
+                                            className={`px-3 py-1 text-sm rounded border transition ${currentPage === item
+                                                    ? 'bg-indigo-600 text-white border-indigo-600 shadow'
+                                                    : 'hover:bg-gray-50 border-gray-200 text-gray-700'
+                                                }`}
+                                            aria-pressed={currentPage === item}
+                                        >
+                                            {item}
+                                        </button>
+                                    )
+                                )}
+
+                                <button
+                                    type="button"
+                                    onClick={() => handleSetPage(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="px-3 py-1 text-sm rounded border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Sau
+                                </button>
+                            </div>
+                        </nav>
+                    )}
+
                     {!loading && filteredProducts.length > 0 && viewMode === 'list' && (
-                        <div className="space-y-4">
-                            {filteredProducts.map(product => (
+                        <div key={currentPage} className="space-y-4">
+                            {currentPageProducts.map(product => (
                                 <Link
                                     key={product._id}
                                     to={`/shop/${product._id}`}

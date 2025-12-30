@@ -8,12 +8,17 @@ export default function Inventory() {
     const [loading, setLoading] = useState(true)
     const [showForm, setShowForm] = useState(false)
     const [formType, setFormType] = useState<'in' | 'out' | 'adjust'>('in')
+    const [lowStockItems, setLowStockItems] = useState<Product[]>([])
 
     const fetchData = async () => {
         setLoading(true)
         try {
-            const res = await listInventoryMovements(type ? { type } : undefined)
-            setItems(res.items)
+            const [movementsRes, lowStockRes] = await Promise.all([
+                listInventoryMovements(type ? { type } : undefined),
+                listProducts({ lowStock: true, limit: 5 })
+            ])
+            setItems(movementsRes.items)
+            setLowStockItems(lowStockRes.items || [])
         } catch (e) {
             console.error(e)
         } finally {
@@ -42,6 +47,20 @@ export default function Inventory() {
                         <option value="adjust">Điều chỉnh</option>
                     </select>
                 </div>
+                {lowStockItems.length > 0 && (
+                    <div className="px-3 py-2 border-b bg-amber-50 text-sm text-amber-800">
+                        <div className="font-semibold mb-1">Cảnh báo tồn kho thấp</div>
+                        <div className="space-y-1">
+                            {lowStockItems.map(item => (
+                                <div key={item._id} className="flex flex-wrap items-center gap-2">
+                                    <span className="font-medium">{item.name}</span>
+                                    <span className="text-xs px-2 py-1 rounded-full bg-white border border-amber-200">{item.stock} / {item.minStockLevel ?? item.reorderPoint ?? 0}</span>
+                                    {item.binLocation && <span className="text-xs px-2 py-1 rounded-full bg-white border border-amber-200">Vị trí: {item.binLocation}</span>}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 {loading && <div className="p-4 text-sm text-gray-500">Đang tải...</div>}
                 {!loading && (
                     <div className="p-2 overflow-x-auto">

@@ -7,14 +7,26 @@ interface ProductFormData {
     sku: string
     partNumber: string
     brand: string
+    manufacturer: string
     category: string
     price: number
+    wholesalePrice: number
     cost: number
     stock: number
     reorderPoint: number
+    minStockLevel: number
+    unit: string
+    binLocation: string
     supplier: string
     image?: string
     description?: string
+    specifications: {
+        voltage: string
+        current: string
+        power: string
+        package: string
+        datasheet: string
+    }
 }
 
 export default function Products() {
@@ -158,60 +170,67 @@ export default function Products() {
                                     <th className="p-2">Ảnh</th>
                                     <th className="p-2">SKU</th>
                                     <th className="p-2">Tên</th>
-                                    <th className="p-2">Hãng</th>
                                     <th className="p-2">Danh mục</th>
-                                    <th className="p-2">Giá</th>
-                                    <th className="p-2">Tồn</th>
+                                    <th className="p-2">Giá lẻ</th>
+                                    <th className="p-2">Giá sỉ</th>
+                                    <th className="p-2">Tồn / Ngưỡng</th>
+                                    <th className="p-2">Đơn vị</th>
+                                    <th className="p-2">Bin</th>
                                     <th className="p-2">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {items.map(p => (
-                                    <tr key={p._id} className="border-b hover:bg-gray-50">
-                                        <td className="p-2">
-                                            {p.image ? (
-                                                <img
-                                                    src={p.image}
-                                                    alt={p.name}
-                                                    className="w-12 h-12 object-cover rounded border"
-                                                />
-                                            ) : (
-                                                <div className="w-12 h-12 bg-gray-200 rounded border flex items-center justify-center">
-                                                    <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="p-2 font-mono">{p.sku}</td>
-                                        <td className="p-2">{p.name}</td>
-                                        <td className="p-2">{p.brand ?? '-'}</td>
-                                        <td className="p-2">{p.category ?? '-'}</td>
-                                        <td className="p-2">{p.price.toLocaleString('vi-VN')}₫</td>
-                                        <td className="p-2">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${p.stock <= (p.reorderPoint || 0)
-                                                ? 'bg-red-100 text-red-800'
-                                                : 'bg-green-100 text-green-800'
-                                                }`}>
-                                                {p.stock}
-                                            </span>
-                                        </td>
-                                        <td className="p-2 space-x-2">
-                                            <button
-                                                onClick={() => handleEdit(p)}
-                                                className="text-blue-600 hover:text-blue-900"
-                                            >
-                                                Sửa
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(p._id)}
-                                                className="text-red-600 hover:text-red-900"
-                                            >
-                                                Xóa
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {items.map(p => {
+                                    const lowStock = p.stock <= (p.minStockLevel ?? p.reorderPoint ?? 0)
+                                    return (
+                                        <tr key={p._id} className="border-b hover:bg-gray-50 align-top">
+                                            <td className="p-2">
+                                                {p.image ? (
+                                                    <img
+                                                        src={p.image}
+                                                        alt={p.name}
+                                                        className="w-12 h-12 object-cover rounded border"
+                                                    />
+                                                ) : (
+                                                    <div className="w-12 h-12 bg-gray-200 rounded border flex items-center justify-center">
+                                                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="p-2 font-mono whitespace-nowrap">{p.sku}</td>
+                                            <td className="p-2">
+                                                <div className="font-medium text-gray-900">{p.name}</div>
+                                                <div className="text-xs text-gray-500">{p.brand || p.manufacturer || '-'}</div>
+                                            </td>
+                                            <td className="p-2 whitespace-nowrap">{p.category ?? '-'}</td>
+                                            <td className="p-2 whitespace-nowrap">{p.price.toLocaleString('vi-VN')}₫</td>
+                                            <td className="p-2 whitespace-nowrap">{(p.wholesalePrice ?? 0).toLocaleString('vi-VN')}₫</td>
+                                            <td className="p-2 whitespace-nowrap">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${lowStock ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                                                    {p.stock} / {p.minStockLevel ?? p.reorderPoint ?? 0}
+                                                </span>
+                                            </td>
+                                            <td className="p-2 whitespace-nowrap">{p.unit || 'pcs'}</td>
+                                            <td className="p-2 whitespace-nowrap">{p.binLocation || '-'}</td>
+                                            <td className="p-2 space-x-2 whitespace-nowrap">
+                                                <button
+                                                    onClick={() => handleEdit(p)}
+                                                    className="text-blue-600 hover:text-blue-900"
+                                                >
+                                                    Sửa
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(p._id)}
+                                                    className="text-red-600 hover:text-red-900"
+                                                >
+                                                    Xóa
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    )
+                                })}
                             </tbody>
                         </table>
                         {items.length === 0 && (
@@ -274,23 +293,47 @@ function ProductFormModal({ product, suppliers, onClose, onSubmit }: ProductForm
         sku: product?.sku || '',
         partNumber: product?.partNumber || '',
         brand: product?.brand || '',
+        manufacturer: product?.manufacturer || '',
         category: product?.category || '',
         price: product?.price || 0,
+        wholesalePrice: product?.wholesalePrice || 0,
         cost: product?.cost || 0,
         stock: product?.stock || 0,
         reorderPoint: product?.reorderPoint || 10,
+        minStockLevel: product?.minStockLevel || product?.reorderPoint || 10,
+        unit: product?.unit || 'pcs',
+        binLocation: product?.binLocation || '',
         supplier: product?.supplier || '',
         image: product?.image || '',
         description: product?.description || '',
+        specifications: {
+            voltage: product?.specifications?.voltage || '',
+            current: product?.specifications?.current || '',
+            power: product?.specifications?.power || '',
+            package: product?.specifications?.package || '',
+            datasheet: product?.specifications?.datasheet || '',
+        },
     })
 
     const [imagePreview, setImagePreview] = useState<string>(product?.image || '')
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target
+        const numericFields = ['price', 'wholesalePrice', 'cost', 'stock', 'reorderPoint', 'minStockLevel']
         setFormData(prev => ({
             ...prev,
-            [name]: ['price', 'cost', 'stock', 'reorderPoint'].includes(name) ? Number(value) : value
+            [name]: numericFields.includes(name) ? Number(value) : value
+        }))
+    }
+
+    const handleSpecChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target
+        setFormData(prev => ({
+            ...prev,
+            specifications: {
+                ...prev.specifications,
+                [name]: value
+            }
         }))
     }
 
@@ -394,31 +437,61 @@ function ProductFormModal({ product, suppliers, onClose, onSubmit }: ProductForm
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Danh mục *
-                        </label>
-                        <select
-                            name="category"
-                            value={formData.category}
-                            onChange={handleChange}
-                            required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        >
-                            <option value="">Chọn danh mục</option>
-                            <option value="Crystal">Crystal</option>
-                            <option value="Diode">Diode</option>
-                            <option value="Điện trở">Điện trở</option>
-                            <option value="IC">IC</option>
-                            <option value="LED">LED</option>
-                            <option value="Potentiometer">Potentiometer</option>
-                            <option value="Relay">Relay</option>
-                            <option value="Transistor">Transistor</option>
-                            <option value="Tụ điện">Tụ điện</option>
-                        </select>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Nhà sản xuất
+                            </label>
+                            <input
+                                type="text"
+                                name="manufacturer"
+                                value={formData.manufacturer}
+                                onChange={handleChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Danh mục *
+                            </label>
+                            <select
+                                name="category"
+                                value={formData.category}
+                                onChange={handleChange}
+                                required
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            >
+                                <option value="">Chọn danh mục</option>
+                                <option value="Crystal">Crystal</option>
+                                <option value="Diode">Diode</option>
+                                <option value="Điện trở">Điện trở</option>
+                                <option value="IC">IC</option>
+                                <option value="LED">LED</option>
+                                <option value="Potentiometer">Potentiometer</option>
+                                <option value="Relay">Relay</option>
+                                <option value="Transistor">Transistor</option>
+                                <option value="Tụ điện">Tụ điện</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Đơn vị tính
+                            </label>
+                            <select
+                                name="unit"
+                                value={formData.unit}
+                                onChange={handleChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            >
+                                <option value="pcs">Cái (pcs)</option>
+                                <option value="reel">Cuộn (reel)</option>
+                                <option value="meter">Mét (m)</option>
+                                <option value="box">Hộp</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Giá nhập (₫) *
@@ -436,7 +509,7 @@ function ProductFormModal({ product, suppliers, onClose, onSubmit }: ProductForm
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Giá bán (₫) *
+                                Giá bán lẻ (₫) *
                             </label>
                             <input
                                 type="number"
@@ -449,9 +522,23 @@ function ProductFormModal({ product, suppliers, onClose, onSubmit }: ProductForm
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                             />
                         </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Giá bán sỉ (₫)
+                            </label>
+                            <input
+                                type="number"
+                                name="wholesalePrice"
+                                value={formData.wholesalePrice}
+                                onChange={handleChange}
+                                min="0"
+                                step="1000"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            />
+                        </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Tồn kho *
@@ -479,25 +566,85 @@ function ProductFormModal({ product, suppliers, onClose, onSubmit }: ProductForm
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                             />
                         </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Ngưỡng cảnh báo (min-stock)
+                            </label>
+                            <input
+                                type="number"
+                                name="minStockLevel"
+                                value={formData.minStockLevel}
+                                onChange={handleChange}
+                                min="0"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            />
+                        </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Nhà cung cấp
-                        </label>
-                        <select
-                            name="supplier"
-                            value={formData.supplier}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        >
-                            <option value="">Chọn nhà cung cấp</option>
-                            {suppliers.map((supplier) => (
-                                <option key={supplier._id} value={supplier._id}>
-                                    {supplier.name}
-                                </option>
-                            ))}
-                        </select>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Vị trí kho (Bin Location)
+                            </label>
+                            <input
+                                type="text"
+                                name="binLocation"
+                                value={formData.binLocation}
+                                onChange={handleChange}
+                                placeholder="Kệ A - Tầng 2 - Hộp 5"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Nhà cung cấp
+                            </label>
+                            <select
+                                name="supplier"
+                                value={formData.supplier}
+                                onChange={handleChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            >
+                                <option value="">Chọn nhà cung cấp</option>
+                                {suppliers.map((supplier) => (
+                                    <option key={supplier._id} value={supplier._id}>
+                                        {supplier.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Datasheet (link)
+                            </label>
+                            <input
+                                type="url"
+                                name="datasheet"
+                                value={formData.specifications.datasheet}
+                                onChange={handleSpecChange}
+                                placeholder="https://..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Điện áp (V)</label>
+                            <input type="text" name="voltage" value={formData.specifications.voltage} onChange={handleSpecChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Dòng điện (A)</label>
+                            <input type="text" name="current" value={formData.specifications.current} onChange={handleSpecChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Công suất (W)</label>
+                            <input type="text" name="power" value={formData.specifications.power} onChange={handleSpecChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Package (DIP/SMD...)</label>
+                            <input type="text" name="package" value={formData.specifications.package} onChange={handleSpecChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+                        </div>
                     </div>
 
                     <div>

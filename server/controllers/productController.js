@@ -2,7 +2,10 @@ const Product = require('../models/Product')
 
 exports.list = async (req, res, next) => {
     try {
-        const { q, category, brand, status, lowStock, page = 1, limit = 20 } = req.query
+        const { q, category, brand, status, lowStock, page = 1, limit } = req.query
+        const pageNum = Math.max(1, Number(page) || 1)
+        // Default higher to avoid silently truncating product lists on the shop page
+        const limitNum = Math.min(Number(limit) || 500, 500)
         const filter = {}
 
         if (q) {
@@ -33,8 +36,8 @@ exports.list = async (req, res, next) => {
         const items = await Product.find(filter)
             .populate('supplier', 'name')
             .sort({ createdAt: -1 })
-            .skip((page - 1) * limit)
-            .limit(Number(limit))
+            .skip((pageNum - 1) * limitNum)
+            .limit(limitNum)
         const total = await Product.countDocuments(filter)
         res.json({ items, total })
     } catch (e) { next(e) }

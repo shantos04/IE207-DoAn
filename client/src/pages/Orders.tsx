@@ -47,6 +47,11 @@ export default function Orders() {
         }
     }
 
+    const handlePrint = (order: Order, type: 'packing' | 'invoice') => {
+        const label = type === 'packing' ? 'phiếu đóng gói' : 'hóa đơn/vận đơn'
+        alert(`Tính năng in ${label} sẽ được kết nối với dịch vụ vận chuyển. Mã đơn: ${order.code}`)
+    }
+
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -88,16 +93,22 @@ export default function Orders() {
                                             <span className={`px-2 py-1 rounded text-xs ${statusColors[o.status]}`}>{statusLabels[o.status]}</span>
                                         </td>
                                         <td className="p-2">{new Date(o.createdAt).toLocaleDateString('vi-VN')}</td>
-                                        <td className="p-2">
-                                            {o.status === 'draft' && (
-                                                <button onClick={() => handleStatusChange(o._id, 'confirmed')} className="text-primary-600 hover:underline mr-2">Xác nhận</button>
-                                            )}
-                                            {o.status === 'confirmed' && (
-                                                <button onClick={() => handleStatusChange(o._id, 'shipped')} className="text-primary-600 hover:underline mr-2">Giao hàng</button>
-                                            )}
-                                            {o.status === 'shipped' && (
-                                                <button onClick={() => handleStatusChange(o._id, 'completed')} className="text-primary-600 hover:underline mr-2">Hoàn thành</button>
-                                            )}
+                                        <td className="p-2 space-y-1 whitespace-nowrap">
+                                            <div className="space-x-2">
+                                                {o.status === 'draft' && (
+                                                    <button onClick={() => handleStatusChange(o._id, 'confirmed')} className="text-primary-600 hover:underline">Xác nhận</button>
+                                                )}
+                                                {o.status === 'confirmed' && (
+                                                    <button onClick={() => handleStatusChange(o._id, 'shipped')} className="text-primary-600 hover:underline">Giao hàng</button>
+                                                )}
+                                                {o.status === 'shipped' && (
+                                                    <button onClick={() => handleStatusChange(o._id, 'completed')} className="text-primary-600 hover:underline">Hoàn thành</button>
+                                                )}
+                                            </div>
+                                            <div className="flex flex-col gap-1 text-xs text-gray-600">
+                                                <button onClick={() => handlePrint(o, 'packing')} className="text-blue-600 hover:underline text-left">In phiếu đóng gói</button>
+                                                <button onClick={() => handlePrint(o, 'invoice')} className="text-blue-600 hover:underline text-left">In hóa đơn / vận đơn</button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
