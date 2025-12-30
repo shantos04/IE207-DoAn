@@ -24,7 +24,8 @@ export default function Shop() {
 
     // Filter & Sort states
     const [selectedCategory, setSelectedCategory] = useState<string>('all')
-    const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000])
+    const [maxPrice, setMaxPrice] = useState<number>(1000000)
+    const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000])
     const [sortBy, setSortBy] = useState<string>('name-asc')
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
@@ -39,6 +40,12 @@ export default function Shop() {
             const res = await listProducts(params)
             setProducts(res.items)
             setFilteredProducts(res.items)
+            // Calculate max price from products
+            if (res.items.length > 0) {
+                const max = Math.max(...res.items.map(p => p.price))
+                setMaxPrice(max)
+                setPriceRange([0, max])
+            }
         } catch (e) {
             console.error(e)
         } finally {
@@ -426,8 +433,8 @@ export default function Shop() {
                             <input
                                 type="range"
                                 min="0"
-                                max="10000000"
-                                step="100000"
+                                max={maxPrice}
+                                step={Math.max(1000, Math.floor(maxPrice / 100))}
                                 value={priceRange[1]}
                                 onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value)])}
                                 className="w-40"
@@ -436,7 +443,7 @@ export default function Shop() {
                             <button
                                 onClick={() => {
                                     setSelectedCategory('all')
-                                    setPriceRange([0, 10000000])
+                                    setPriceRange([0, maxPrice])
                                     setQ('')
                                     fetchProducts()
                                 }}
@@ -615,8 +622,8 @@ export default function Shop() {
                                             type="button"
                                             onClick={() => handleSetPage(item)}
                                             className={`px-3 py-1 text-sm rounded border transition ${currentPage === item
-                                                    ? 'bg-indigo-600 text-white border-indigo-600 shadow'
-                                                    : 'hover:bg-gray-50 border-gray-200 text-gray-700'
+                                                ? 'bg-indigo-600 text-white border-indigo-600 shadow'
+                                                : 'hover:bg-gray-50 border-gray-200 text-gray-700'
                                                 }`}
                                             aria-pressed={currentPage === item}
                                         >
