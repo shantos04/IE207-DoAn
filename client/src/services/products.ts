@@ -26,6 +26,11 @@ export async function createProduct(productData: Partial<Product>) {
     return data
 }
 
+export async function getProduct(id: string) {
+    const { data } = await api.get(`/products/${id}`)
+    return data as Product
+}
+
 export async function updateProduct(id: string, productData: Partial<Product>) {
     const { data } = await api.put(`/products/${id}`, productData)
     return data

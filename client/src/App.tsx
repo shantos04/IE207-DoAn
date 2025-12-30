@@ -15,6 +15,7 @@ import Inventory from './pages/Inventory'
 import Settings from './pages/Settings'
 import Shop from './pages/Shop'
 import MyOrders from './pages/MyOrders'
+import ProductDetail from './pages/ProductDetail'
 import AppLayout from './components/AppLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -48,6 +49,7 @@ function App() {
         <Route path="inventory" element={<Inventory />} />
         <Route path="settings" element={<Settings />} />
         <Route path="shop" element={<Shop />} />
+        <Route path="shop/:id" element={<ProductDetail />} />
         <Route path="my-orders" element={<MyOrders />} />
       </Route>
     </Routes>
