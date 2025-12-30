@@ -20,6 +20,7 @@ export default function AppLayout() {
     const { pathname } = useLocation()
     const navigate = useNavigate()
     const [userRole, setUserRole] = useState<string>('customer')
+    const isShopPage = pathname.startsWith('/shop')
 
     useEffect(() => {
         // Decode JWT token to get user info
@@ -43,8 +44,8 @@ export default function AppLayout() {
     }
 
     return (
-        <div className="h-screen grid grid-cols-[260px_1fr]">
-            <aside className="hidden md:flex flex-col bg-white border-r border-gray-200">
+        <div className={`h-screen grid ${isShopPage ? 'grid-cols-1' : 'grid-cols-[260px_1fr]'}`}>
+            <aside className={`${isShopPage ? 'hidden' : 'hidden md:flex flex-col bg-white border-r border-gray-200'}`}>
                 <div className="h-16 flex items-center px-4 border-b">
                     <Link to="/" className="font-semibold text-primary-700">ERP Linh Kiện</Link>
                 </div>
@@ -71,18 +72,20 @@ export default function AppLayout() {
             </aside>
 
             <div className="flex flex-col min-w-0">
-                <header className="h-16 flex items-center justify-between px-4 border-b bg-white">
-                    <div className="font-medium text-gray-700">{getTitle(pathname)}</div>
-                    <div className="flex items-center gap-3">
-                        <span className="hidden sm:inline text-sm text-gray-500">Xin chào, User</span>
-                        {userRole === 'staff' && (
-                            <Link to="/shop" className="text-sm text-primary-700 hover:underline">🛒 Xem cửa hàng</Link>
-                        )}
-                        <button onClick={logout} className="text-sm text-primary-700 hover:underline">Đăng xuất</button>
-                    </div>
-                </header>
-                <main className="flex-1 overflow-y-auto p-4">
-                    <div className="max-w-7xl mx-auto">
+                {!isShopPage && (
+                    <header className="h-16 flex items-center justify-between px-4 border-b bg-white">
+                        <div className="font-medium text-gray-700">{getTitle(pathname)}</div>
+                        <div className="flex items-center gap-3">
+                            <span className="hidden sm:inline text-sm text-gray-500">Xin chào, User</span>
+                            {userRole === 'staff' && (
+                                <Link to="/shop" className="text-sm text-primary-700 hover:underline">🛒 Xem cửa hàng</Link>
+                            )}
+                            <button onClick={logout} className="text-sm text-primary-700 hover:underline">Đăng xuất</button>
+                        </div>
+                    </header>
+                )}
+                <main className={`flex-1 overflow-y-auto ${isShopPage ? 'p-0' : 'p-4'}`}>
+                    <div className={isShopPage ? '' : 'max-w-7xl mx-auto'}>
                         <Outlet />
                     </div>
                 </main>

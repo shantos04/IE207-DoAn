@@ -212,16 +212,33 @@ export default function Shop() {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.15),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(236,72,153,0.12),transparent_25%)]" aria-hidden />
 
                 {/* Top bar */}
-                <div className="sticky top-0 z-40 backdrop-blur bg-white/80 border-b">
-                    <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-                        <div>
+                <div className="sticky top-0 z-40 backdrop-blur bg-white/90 border-b">
+                    <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6">
+                        <div className="shrink-0">
                             <p className="text-xs uppercase tracking-[0.2em] text-indigo-500 font-semibold">Tech Store</p>
                             <h1 className="text-2xl font-bold text-gray-900">Cửa hàng linh kiện điện tử</h1>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <nav className="flex-1 hidden md:block">
+                            <ul className="flex items-center gap-4 text-sm font-semibold text-gray-600">
+                                <li><a href="#hero" className="hover:text-indigo-600">Trang chủ</a></li>
+                                <li><a href="#filters" className="hover:text-indigo-600">Bộ lọc</a></li>
+                                <li><a href="#products" className="hover:text-indigo-600">Danh sách</a></li>
+                                <li><a href="#cart" className="hover:text-indigo-600">Giỏ hàng</a></li>
+                            </ul>
+                        </nav>
+                        <div className="md:hidden flex-1 overflow-x-auto">
+                            <ul className="flex items-center gap-3 text-sm font-semibold text-gray-600 whitespace-nowrap">
+                                <li><a href="#hero" className="hover:text-indigo-600">Trang chủ</a></li>
+                                <li><a href="#filters" className="hover:text-indigo-600">Bộ lọc</a></li>
+                                <li><a href="#products" className="hover:text-indigo-600">Danh sách</a></li>
+                                <li><a href="#cart" className="hover:text-indigo-600">Giỏ hàng</a></li>
+                            </ul>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
                             <button
                                 onClick={() => setShowCart(true)}
                                 className="relative btn btn-primary shadow-md"
+                                id="cart"
                             >
                                 <span className="flex items-center gap-2">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,7 +257,7 @@ export default function Shop() {
                 </div>
 
                 {/* Hero */}
-                <div className="max-w-7xl mx-auto px-4 pt-10 pb-8">
+                <div id="hero" className="max-w-7xl mx-auto px-4 pt-10 pb-8">
                     <div className="grid lg:grid-cols-[1.3fr_1fr] gap-8 items-center">
                         <div className="space-y-6">
                             <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-white shadow-sm text-sm text-indigo-600 border border-indigo-100">
@@ -321,7 +338,7 @@ export default function Shop() {
 
                 {/* Filters + list */}
                 <div className="max-w-7xl mx-auto px-4 pb-12 space-y-6">
-                    <div className="bg-white/80 backdrop-blur border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-wrap gap-3 items-center justify-between">
+                    <div id="filters" className="bg-white/80 backdrop-blur border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-wrap gap-3 items-center justify-between">
                         <div className="flex flex-wrap gap-2 items-center">
                             <span className="text-sm text-gray-500">Danh mục:</span>
                             <button
@@ -367,7 +384,7 @@ export default function Shop() {
                         </div>
                     </div>
 
-                    <div className="bg-white/90 backdrop-blur border border-gray-100 shadow-md rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+                    <div id="products" className="bg-white/90 backdrop-blur border border-gray-100 shadow-md rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
                         <div className="text-sm text-gray-600">
                             Hiển thị <span className="font-semibold text-gray-900">{filteredProducts.length}</span> sản phẩm
                         </div>
