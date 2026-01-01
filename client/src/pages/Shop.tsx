@@ -77,12 +77,6 @@ export default function Shop() {
             case 'price-desc':
                 filtered.sort((a, b) => b.price - a.price)
                 break
-            case 'stock-asc':
-                filtered.sort((a, b) => a.stock - b.stock)
-                break
-            case 'stock-desc':
-                filtered.sort((a, b) => b.stock - a.stock)
-                break
         }
 
         setFilteredProducts(filtered)
@@ -511,8 +505,6 @@ export default function Shop() {
                                 <option value="name-desc">Tên Z-A</option>
                                 <option value="price-asc">Giá thấp đến cao</option>
                                 <option value="price-desc">Giá cao đến thấp</option>
-                                <option value="stock-asc">Tồn kho ít nhất</option>
-                                <option value="stock-desc">Tồn kho nhiều nhất</option>
                             </select>
                             <div className="flex rounded-lg border border-gray-200 overflow-hidden">
                                 <button
