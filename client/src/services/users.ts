@@ -47,9 +47,9 @@ export async function updateProfile(payload: { name: string; phone?: string; add
 }
 
 export async function changePassword(currentPassword: string, newPassword: string) {
-    const { data } = await api.post<{ message: string }>('/users/change-password', { 
-        currentPassword, 
-        newPassword 
+    const { data } = await api.post<{ message: string }>('/users/change-password', {
+        currentPassword,
+        newPassword
     })
     return data
 }

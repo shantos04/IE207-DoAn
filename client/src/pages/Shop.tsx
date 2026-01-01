@@ -344,8 +344,8 @@ export default function Shop() {
                                         className="absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
                                         onMouseLeave={() => setShowUserMenu(false)}
                                     >
-                                        <Link 
-                                            to="/my-orders" 
+                                        <Link
+                                            to="/my-orders"
                                             className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                                         >
                                             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -353,8 +353,8 @@ export default function Shop() {
                                             </svg>
                                             <span className="text-sm text-gray-700">Đơn hàng của tôi</span>
                                         </Link>
-                                        <Link 
-                                            to="/settings" 
+                                        <Link
+                                            to="/settings"
                                             className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-t"
                                         >
                                             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,8 +363,8 @@ export default function Shop() {
                                             </svg>
                                             <span className="text-sm text-gray-700">Cài đặt</span>
                                         </Link>
-                                        <button 
-                                            onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} 
+                                        <button
+                                            onClick={() => { localStorage.removeItem('token'); navigate('/login'); }}
                                             className="flex items-center gap-3 w-full px-4 py-3 hover:bg-gray-50 transition-colors border-t"
                                         >
                                             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

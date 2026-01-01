@@ -18,7 +18,7 @@ exports.updateProfile = async (req, res, next) => {
             { name, phone, address },
             { new: true, runValidators: true }
         ).select('-password')
-        
+
         if (!user) return res.status(404).json({ message: 'User not found' })
         res.json(user)
     } catch (e) { next(e) }
@@ -28,28 +28,28 @@ exports.updateProfile = async (req, res, next) => {
 exports.changePassword = async (req, res, next) => {
     try {
         const { currentPassword, newPassword } = req.body
-        
+
         if (!currentPassword || !newPassword) {
             return res.status(400).json({ message: 'Vui lòng cung cấp mật khẩu hiện tại và mật khẩu mới' })
         }
-        
+
         if (newPassword.length < 6) {
             return res.status(400).json({ message: 'Mật khẩu mới phải có ít nhất 6 ký tự' })
         }
-        
+
         const user = await User.findById(req.user.sub)
         if (!user) return res.status(404).json({ message: 'User not found' })
-        
+
         // Verify current password
         const isMatch = await user.comparePassword(currentPassword)
         if (!isMatch) {
             return res.status(401).json({ message: 'Mật khẩu hiện tại không đúng' })
         }
-        
+
         // Update password
         user.password = newPassword
         await user.save()
-        
+
         res.json({ message: 'Đổi mật khẩu thành công' })
     } catch (e) { next(e) }
 }
@@ -59,7 +59,7 @@ exports.getSettings = async (req, res, next) => {
     try {
         const user = await User.findById(req.user.sub).select('settings')
         if (!user) return res.status(404).json({ message: 'User not found' })
-        
+
         // Return default settings if not exists
         const settings = user.settings || {
             notifications: {
@@ -76,7 +76,7 @@ exports.getSettings = async (req, res, next) => {
                 twoFactorEnabled: false
             }
         }
-        
+
         res.json(settings)
     } catch (e) { next(e) }
 }
@@ -85,13 +85,13 @@ exports.getSettings = async (req, res, next) => {
 exports.updateSettings = async (req, res, next) => {
     try {
         const { settings } = req.body
-        
+
         const user = await User.findByIdAndUpdate(
             req.user.sub,
             { settings },
             { new: true, runValidators: true }
         ).select('settings')
-        
+
         if (!user) return res.status(404).json({ message: 'User not found' })
         res.json(user.settings)
     } catch (e) { next(e) }
@@ -128,7 +128,7 @@ exports.getLoginHistory = async (req, res, next) => {
                 current: false
             }
         ]
-        
+
         res.json(history)
     } catch (e) { next(e) }
 }

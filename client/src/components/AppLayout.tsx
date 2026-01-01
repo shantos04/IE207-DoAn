@@ -23,6 +23,7 @@ export default function AppLayout() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const isShopPage = pathname.startsWith('/shop')
+    const isSettingsPage = pathname.startsWith('/settings')
 
     useEffect(() => {
         // Decode JWT token to get user info
@@ -39,7 +40,7 @@ export default function AppLayout() {
     }, [])
 
     const menu = userRole === 'customer' ? customerMenu : staffMenu
-    const isCustomerPage = isShopPage || pathname.startsWith('/my-orders')
+    const isCustomerPage = isShopPage || pathname.startsWith('/my-orders') || isSettingsPage
 
     const breadcrumbs = useMemo(() => buildBreadcrumbs(pathname, menu), [pathname, menu])
 
