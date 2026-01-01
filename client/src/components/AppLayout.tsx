@@ -40,7 +40,7 @@ export default function AppLayout() {
     }, [])
 
     const menu = userRole === 'customer' ? customerMenu : staffMenu
-    const isCustomerPage = isShopPage || pathname.startsWith('/my-orders') || isSettingsPage
+    const isCustomerPage = (isShopPage || pathname.startsWith('/my-orders') || (isSettingsPage && userRole === 'customer'))
 
     const breadcrumbs = useMemo(() => buildBreadcrumbs(pathname, menu), [pathname, menu])
 
