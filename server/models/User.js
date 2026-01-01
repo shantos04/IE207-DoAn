@@ -10,6 +10,21 @@ const userSchema = new mongoose.Schema(
         active: { type: Boolean, default: true },
         phone: { type: String },
         address: { type: String },
+        settings: {
+            notifications: {
+                email: { type: Boolean, default: true },
+                orderUpdates: { type: Boolean, default: true },
+                promotions: { type: Boolean, default: false },
+                newsletter: { type: Boolean, default: false }
+            },
+            display: {
+                theme: { type: String, enum: ['light', 'dark', 'auto'], default: 'light' },
+                language: { type: String, enum: ['vi', 'en'], default: 'vi' }
+            },
+            security: {
+                twoFactorEnabled: { type: Boolean, default: false }
+            }
+        }
     },
     { timestamps: true }
 )

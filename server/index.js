@@ -51,6 +51,7 @@ app.use('/api/customers', require('./routes/customers'))
 app.use('/api/orders', require('./routes/orders'))
 app.use('/api/inventory', require('./routes/inventory'))
 app.use('/api/reports', require('./routes/reports'))
+app.use('/api/users', require('./routes/users'))
 
 app.use((err, req, res, next) => {
     console.error(err)

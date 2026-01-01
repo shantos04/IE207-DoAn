@@ -2,7 +2,7 @@ import type { FormEvent } from 'react'
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
-import { login as loginApi, loginWithGoogle, loginWithFacebook } from '../services/auth'
+import { login as loginApi, loginWithGoogle } from '../services/auth'
 
 interface LoginProps {
     hasGoogleOAuth?: boolean
@@ -23,25 +23,6 @@ export default function Login({ hasGoogleOAuth = false }: LoginProps) {
         const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
         if (clientId && !clientId.includes('YOUR_')) {
             setGoogleClientId(clientId)
-        }
-
-        // Load Facebook SDK
-        if (!window.FB) {
-            window.fbAsyncInit = function () {
-                FB.init({
-                    appId: import.meta.env.VITE_FACEBOOK_APP_ID || 'YOUR_FACEBOOK_APP_ID',
-                    xfbml: true,
-                    version: 'v18.0'
-                })
-            }
-
-            // Load the Facebook SDK script
-            const script = document.createElement('script')
-            script.async = true
-            script.defer = true
-            script.crossOrigin = 'anonymous'
-            script.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0'
-            document.body.appendChild(script)
         }
     }, [])
 
@@ -72,42 +53,6 @@ export default function Login({ hasGoogleOAuth = false }: LoginProps) {
         } finally {
             setLoading(false)
         }
-    }
-
-    const handleFacebookLogin = async (response: any) => {
-        setError(null)
-        setLoading(true)
-        try {
-            const res = await loginWithFacebook(response.accessToken, response.userID, response.name, response.email)
-            localStorage.setItem('token', res.token)
-            navigate(from, { replace: true })
-        } catch (err: any) {
-            setError(err?.response?.data?.message ?? err?.message ?? 'Đăng nhập Facebook thất bại')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleFacebookClick = () => {
-        if (!window.FB) {
-            setError('Facebook SDK chưa tải xong')
-            return
-        }
-
-        FB.login((response: any) => {
-            if (response.authResponse) {
-                FB.api('/me', { fields: 'id,name,email' }, (userInfo: any) => {
-                    handleFacebookLogin({
-                        accessToken: response.authResponse.accessToken,
-                        userID: userInfo.id,
-                        name: userInfo.name,
-                        email: userInfo.email
-                    })
-                })
-            } else {
-                setError('Đăng nhập Facebook bị hủy')
-            }
-        }, { scope: 'public_profile,email' })
     }
 
     return (
@@ -145,26 +90,17 @@ export default function Login({ hasGoogleOAuth = false }: LoginProps) {
                 </div>
 
                 {googleClientId ? (
-                    <div className="mx-auto w-2/3 space-y-3">
+                    <div className="mx-auto w-2/3">
                         <GoogleLogin
                             onSuccess={handleGoogleLogin}
                             onError={() => setError('Đăng nhập Google thất bại')}
                             text="signin_with"
                         />
-
-                        <button
-                            type="button"
-                            onClick={handleFacebookClick}
-                            disabled={loading}
-                            className="w-full rounded bg-blue-600 text-white py-2 hover:bg-blue-700 disabled:opacity-50 font-medium"
-                        >
-                            f Đăng nhập Facebook
-                        </button>
                     </div>
                 ) : (
                     <div className="bg-amber-50 border border-amber-200 rounded p-3 text-sm text-amber-700">
                         <p className="font-medium mb-1">🔧 Chức năng OAuth chưa được cấu hình</p>
-                        <p className="text-xs">Vui lòng tham khảo file <code className="bg-amber-100 px-1">OAUTH_SETUP_GUIDE.md</code> để setup Google/Facebook login</p>
+                        <p className="text-xs">Vui lòng tham khảo file <code className="bg-amber-100 px-1">OAUTH_SETUP_GUIDE.md</code> để setup Google login</p>
                     </div>
                 )}
 

@@ -12,8 +12,8 @@ const staffMenu = [
 ]
 
 const customerMenu = [
-    { to: '/shop', label: '🛒 Cửa hàng' },
-    { to: '/my-orders', label: '📦 Đơn hàng của tôi' },
+    { to: '/shop', label: 'Cửa hàng' },
+    { to: '/my-orders', label: 'Đơn hàng của tôi' },
 ]
 
 export default function AppLayout() {
@@ -39,6 +39,7 @@ export default function AppLayout() {
     }, [])
 
     const menu = userRole === 'customer' ? customerMenu : staffMenu
+    const isCustomerPage = isShopPage || pathname.startsWith('/my-orders')
 
     const breadcrumbs = useMemo(() => buildBreadcrumbs(pathname, menu), [pathname, menu])
 
@@ -48,8 +49,8 @@ export default function AppLayout() {
     }
 
     return (
-        <div className={`h-screen grid ${isShopPage ? 'grid-cols-1' : sidebarCollapsed ? 'grid-cols-[80px_1fr]' : 'grid-cols-[260px_1fr]'}`}>
-            <aside className={`${isShopPage ? 'hidden' : 'hidden md:flex flex-col bg-white border-r border-gray-200'} ${sidebarCollapsed ? 'w-20' : 'w-64'}`}>
+        <div className={`h-screen grid ${isCustomerPage ? 'grid-cols-1' : sidebarCollapsed ? 'grid-cols-[80px_1fr]' : 'grid-cols-[260px_1fr]'}`}>
+            <aside className={`${isCustomerPage ? 'hidden' : 'hidden md:flex flex-col bg-white border-r border-gray-200'} ${sidebarCollapsed ? 'w-20' : 'w-64'}`}>
                 <div className="h-16 flex items-center px-4 border-b">
                     <Link to="/" className={`font-semibold text-primary-700 ${sidebarCollapsed ? 'text-sm text-center w-full' : ''}`}>
                         {sidebarCollapsed ? 'ERP' : 'ERP Linh Kiện'}
@@ -77,7 +78,7 @@ export default function AppLayout() {
             </aside>
 
             <div className="flex flex-col min-w-0">
-                {!isShopPage && (
+                {!isCustomerPage && (
                     <header className="h-16 flex items-center gap-3 px-4 border-b bg-white">
                         <button
                             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -137,7 +138,9 @@ export default function AppLayout() {
                                         className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg p-2 text-sm"
                                         onMouseLeave={() => setShowProfileMenu(false)}
                                     >
-                                        <Link to="/settings" className="block px-3 py-2 rounded hover:bg-gray-50">Cài đặt cá nhân</Link>
+                                        <Link to={userRole === 'customer' ? '/my-orders' : '/settings'} className="block px-3 py-2 rounded hover:bg-gray-50">
+                                            {userRole === 'customer' ? 'Đơn hàng của tôi' : 'Cài đặt cá nhân'}
+                                        </Link>
                                         <button onClick={logout} className="w-full text-left px-3 py-2 rounded hover:bg-gray-50">Đăng xuất</button>
                                     </div>
                                 )}
@@ -145,8 +148,8 @@ export default function AppLayout() {
                         </div>
                     </header>
                 )}
-                <main className={`flex-1 overflow-y-auto ${isShopPage ? 'p-0' : 'p-4'}`}>
-                    <div className={isShopPage ? '' : 'max-w-7xl mx-auto'}>
+                <main className={`flex-1 overflow-y-auto ${isCustomerPage ? 'p-0' : 'p-4'}`}>
+                    <div className={isCustomerPage ? '' : 'max-w-7xl mx-auto'}>
                         <Outlet />
                     </div>
                 </main>
