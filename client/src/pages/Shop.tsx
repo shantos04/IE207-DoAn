@@ -276,7 +276,7 @@ export default function Shop() {
 
                 {/* Top bar */}
                 <div className="sticky top-0 z-40 backdrop-blur bg-white/90 border-b">
-                    <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3 sm:gap-4">
+                    <div className="w-full px-4 py-3 flex items-center gap-3 sm:gap-4">
                         <div className="flex items-center gap-3 shrink-0">
                             <div>
                                 <p className="text-xs uppercase tracking-[0.2em] text-indigo-500 font-semibold">Tech Store</p>
@@ -389,7 +389,7 @@ export default function Shop() {
                 </div>
 
                 {/* Hero */}
-                <div id="hero" className="max-w-7xl mx-auto px-4 pt-10 pb-8">
+                <div id="hero" className="w-full px-4 pt-10 pb-8">
                     <div className="grid lg:grid-cols-[1.3fr_1fr] gap-8 items-center">
                         <div className="space-y-6">
                             <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-white shadow-sm text-sm text-indigo-600 border border-indigo-100">
@@ -443,7 +443,7 @@ export default function Shop() {
                 </div>
 
                 {/* Filters + list */}
-                <div className="max-w-7xl mx-auto px-4 pb-12 space-y-6">
+                <div className="w-full px-4 pb-12 space-y-6">
                     <div id="filters" className="bg-white/80 backdrop-blur border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-wrap gap-3 items-center justify-between">
                         <div className="flex flex-wrap gap-2 items-center">
                             <span className="text-sm text-gray-500">Danh mục:</span>
@@ -635,7 +635,6 @@ export default function Shop() {
                     {!loading && filteredProducts.length > 0 && (
                         <nav className="flex items-center justify-between gap-4 mt-2 relative z-10" aria-label="Phân trang sản phẩm">
                             <div className="text-sm text-gray-600">
-                                Hiển thị {Math.min((currentPage - 1) * pageSize + 1, filteredProducts.length)} - {Math.min(currentPage * pageSize, filteredProducts.length)} / {filteredProducts.length}
                             </div>
                             <div className="flex items-center gap-2 pointer-events-auto">
                                 <button

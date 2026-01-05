@@ -11,11 +11,11 @@ const statusLabels: Record<string, string> = {
 }
 
 const statusColors: Record<string, string> = {
-    draft: 'bg-gray-100 text-gray-700',
-    confirmed: 'bg-blue-100 text-blue-700',
-    shipped: 'bg-yellow-100 text-yellow-700',
-    completed: 'bg-green-100 text-green-700',
-    canceled: 'bg-red-100 text-red-700',
+    draft: 'badge bg-gray-100 text-gray-700 border-gray-200',
+    confirmed: 'badge badge-blue',
+    shipped: 'badge badge-yellow',
+    completed: 'badge badge-green',
+    canceled: 'badge badge-red',
 }
 
 export default function Orders() {
@@ -53,14 +53,22 @@ export default function Orders() {
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Đơn hàng</h2>
-                <Link to="/orders/create" className="px-3 py-2 text-sm rounded bg-primary-600 text-white hover:bg-primary-700">Tạo đơn hàng</Link>
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Quản lý đơn hàng</h2>
+                    <p className="text-sm text-gray-600 mt-1">Theo dõi và xử lý đơn hàng</p>
+                </div>
+                <Link to="/orders/create" className="btn-primary">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Tạo đơn hàng
+                </Link>
             </div>
-            <div className="bg-white rounded-lg border">
-                <div className="p-3 border-b flex items-center gap-2">
-                    <select value={status} onChange={e => setStatus(e.target.value)} className="rounded border-gray-300">
+            <div className="card">
+                <div className="card-header">
+                    <select value={status} onChange={e => setStatus(e.target.value)} className="select w-full md:w-64">
                         <option value="">Tất cả trạng thái</option>
                         <option value="draft">Nháp</option>
                         <option value="confirmed">Đã xác nhận</option>
@@ -69,45 +77,75 @@ export default function Orders() {
                         <option value="canceled">Đã hủy</option>
                     </select>
                 </div>
-                {loading && <div className="p-4 text-sm text-gray-500">Đang tải...</div>}
+                {loading && (
+                    <div className="p-8 text-center">
+                        <div className="inline-block spinner text-primary-600"></div>
+                        <p className="mt-4 text-sm text-gray-600">Đang tải dữ liệu...</p>
+                    </div>
+                )}
                 {!loading && (
-                    <div className="p-2 overflow-x-auto">
-                        <table className="min-w-full text-sm">
+                    <div className="overflow-x-auto">
+                        <table className="table">
                             <thead>
-                                <tr className="text-left border-b">
-                                    <th className="p-2">Mã ĐH</th>
-                                    <th className="p-2">Khách hàng</th>
-                                    <th className="p-2">Tổng tiền</th>
-                                    <th className="p-2">Trạng thái</th>
-                                    <th className="p-2">Ngày tạo</th>
-                                    <th className="p-2"></th>
+                                <tr>
+                                    <th>Mã ĐH</th>
+                                    <th>Khách hàng</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {items.map(o => (
-                                    <tr key={o._id} className="border-b hover:bg-gray-50">
-                                        <td className="p-2 font-mono font-medium">{o.code}</td>
-                                        <td className="p-2">{o.customer?.name}</td>
-                                        <td className="p-2">₫{o.total.toLocaleString('vi-VN')}</td>
-                                        <td className="p-2">
-                                            <span className={`px-2 py-1 rounded text-xs ${statusColors[o.status]}`}>{statusLabels[o.status]}</span>
+                                    <tr key={o._id}>
+                                        <td className="font-mono font-bold text-primary-700">{o.code}</td>
+                                        <td className="font-medium text-gray-900">{o.customer?.name || '-'}</td>
+                                        <td className="font-semibold text-gray-900">₫{o.total.toLocaleString('vi-VN')}</td>
+                                        <td>
+                                            <span className={`badge ${statusColors[o.status]}`}>{statusLabels[o.status]}</span>
                                         </td>
-                                        <td className="p-2">{new Date(o.createdAt).toLocaleDateString('vi-VN')}</td>
-                                        <td className="p-2 space-y-1 whitespace-nowrap">
-                                            <div className="space-x-2">
+                                        <td className="text-gray-600">{new Date(o.createdAt).toLocaleDateString('vi-VN')}</td>
+                                        <td className="space-y-2">
+                                            <div className="flex flex-wrap gap-2">
                                                 {o.status === 'draft' && (
-                                                    <button onClick={() => handleStatusChange(o._id, 'confirmed')} className="text-primary-600 hover:underline">Xác nhận</button>
+                                                    <button 
+                                                        onClick={() => handleStatusChange(o._id, 'confirmed')} 
+                                                        className="px-3 py-1.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                                                    >
+                                                        Xác nhận
+                                                    </button>
                                                 )}
                                                 {o.status === 'confirmed' && (
-                                                    <button onClick={() => handleStatusChange(o._id, 'shipped')} className="text-primary-600 hover:underline">Giao hàng</button>
+                                                    <button 
+                                                        onClick={() => handleStatusChange(o._id, 'shipped')} 
+                                                        className="px-3 py-1.5 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors"
+                                                    >
+                                                        Giao hàng
+                                                    </button>
                                                 )}
                                                 {o.status === 'shipped' && (
-                                                    <button onClick={() => handleStatusChange(o._id, 'completed')} className="text-primary-600 hover:underline">Hoàn thành</button>
+                                                    <button 
+                                                        onClick={() => handleStatusChange(o._id, 'completed')} 
+                                                        className="px-3 py-1.5 text-xs font-medium bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+                                                    >
+                                                        Hoàn thành
+                                                    </button>
                                                 )}
                                             </div>
-                                            <div className="flex flex-col gap-1 text-xs text-gray-600">
-                                                <button onClick={() => handlePrint(o, 'packing')} className="text-blue-600 hover:underline text-left">In phiếu đóng gói</button>
-                                                <button onClick={() => handlePrint(o, 'invoice')} className="text-blue-600 hover:underline text-left">In hóa đơn / vận đơn</button>
+                                            <div className="flex flex-wrap gap-2 text-xs">
+                                                <button 
+                                                    onClick={() => handlePrint(o, 'packing')} 
+                                                    className="text-primary-600 hover:text-primary-700 hover:underline font-medium"
+                                                >
+                                                    In phiếu đóng gói
+                                                </button>
+                                                <button 
+                                                    onClick={() => handlePrint(o, 'invoice')} 
+                                                    className="text-primary-600 hover:text-primary-700 hover:underline font-medium"
+                                                >
+                                                    In hóa đơn
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>

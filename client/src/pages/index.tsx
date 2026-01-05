@@ -37,11 +37,11 @@ const HeroSection = () => {
 
 const Categories = () => {
     const categories = [
-        { name: 'Vi điều khiển', icon: '🛠️' },
-        { name: 'Cảm biến', icon: '🔍' },
-        { name: 'Màn hình OLED', icon: '📺' },
-        { name: 'Module Nguồn', icon: '🔋' },
-        { name: 'Dây kết nối', icon: '🔌' }
+        { name: 'Vi điều khiển', icon: '' },
+        { name: 'Cảm biến', icon: '' },
+        { name: 'Màn hình OLED', icon: '' },
+        { name: 'Module Nguồn', icon: '' },
+        { name: 'Dây kết nối', icon: '' }
     ];
 
     return (

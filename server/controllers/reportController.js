@@ -15,6 +15,11 @@ exports.dashboard = async (req, res, next) => {
         today.setHours(0, 0, 0, 0)
         const ordersToday = await Order.countDocuments({ createdAt: { $gte: today } })
 
+        // Count orders pending processing (pending, processing, confirmed statuses)
+        const ordersPending = await Order.countDocuments({
+            status: { $in: ['pending', 'confirmed', 'processing'] }
+        })
+
         const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1)
         const orders = await Order.find({
             createdAt: { $gte: thisMonth },
@@ -37,6 +42,7 @@ exports.dashboard = async (req, res, next) => {
             outOfStock,
             lowStockCount,
             ordersToday,
+            ordersPending,
             revenueThisMonth,
             topProducts,
         })
